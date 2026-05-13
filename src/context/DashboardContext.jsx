@@ -6,6 +6,15 @@ import {
   useMemo,
   useState,
 } from 'react';
+import {
+  defaultTasks,
+  defaultEvents,
+  defaultProductivity,
+  defaultAIRecommendations,
+  defaultOnlineTeammates,
+  defaultQuickNotes,
+  enhancedProjects,
+} from './overviewData';
 
 const STORAGE_KEY = 'crossthink-dashboard-state-v1';
 
@@ -266,6 +275,7 @@ function getDefaultState() {
   return {
     user: { firstName: 'Alex', lastName: 'Turner', major: 'Computer Science' },
     projects: defaultSeedProjects,
+    enhancedProjects,
     bookmarks: [],
     applications: defaultApplications,
     teams: defaultTeams,
@@ -276,6 +286,13 @@ function getDefaultState() {
     synergyConnections: [],
     activity: defaultActivity(),
     workspace: initialWorkspace,
+    overviewTasks: defaultTasks,
+    calendarEvents: defaultEvents,
+    productivity: defaultProductivity,
+    aiRecommendations: defaultAIRecommendations,
+    onlineTeammates: defaultOnlineTeammates,
+    quickNotes: defaultQuickNotes,
+    rightSidebarOpen: false,
     toast: null,
     headerSearch: '',
     notificationCount: 2,
@@ -307,6 +324,14 @@ function mergeDefaults(parsed) {
     synergyConnections: Array.isArray(parsed.synergyConnections) ? parsed.synergyConnections : [],
     activity: Array.isArray(parsed.activity) && parsed.activity.length ? parsed.activity : base.activity,
     workspace: parsed.workspace?.columns ? parsed.workspace : base.workspace,
+    overviewTasks: Array.isArray(parsed.overviewTasks) && parsed.overviewTasks.length ? parsed.overviewTasks : defaultTasks,
+    calendarEvents: Array.isArray(parsed.calendarEvents) && parsed.calendarEvents.length ? parsed.calendarEvents : defaultEvents,
+    productivity: parsed.productivity && typeof parsed.productivity === 'object' ? parsed.productivity : defaultProductivity,
+    aiRecommendations: parsed.aiRecommendations || defaultAIRecommendations,
+    onlineTeammates: Array.isArray(parsed.onlineTeammates) ? parsed.onlineTeammates : defaultOnlineTeammates,
+    quickNotes: Array.isArray(parsed.quickNotes) ? parsed.quickNotes : defaultQuickNotes,
+    enhancedProjects: Array.isArray(parsed.enhancedProjects) && parsed.enhancedProjects.length ? parsed.enhancedProjects : enhancedProjects,
+    rightSidebarOpen: false,
     toast: null,
     headerSearch: typeof parsed.headerSearch === 'string' ? parsed.headerSearch : '',
     notificationCount: typeof parsed.notificationCount === 'number' ? parsed.notificationCount : 2,
@@ -543,6 +568,33 @@ export function DashboardProvider({ children }) {
     setState((s) => ({ ...s, workspace }));
   }, []);
 
+  const toggleTaskDone = useCallback((taskId) => {
+    setState((s) => ({
+      ...s,
+      overviewTasks: s.overviewTasks.map((t) =>
+        t.id === taskId ? { ...t, status: t.status === 'done' ? 'todo' : 'done' } : t
+      ),
+    }));
+  }, []);
+
+  const addQuickNote = useCallback((text) => {
+    setState((s) => ({
+      ...s,
+      quickNotes: [{ id: `qn-${Date.now()}`, text, createdAt: new Date().toISOString() }, ...s.quickNotes],
+    }));
+  }, []);
+
+  const removeQuickNote = useCallback((noteId) => {
+    setState((s) => ({
+      ...s,
+      quickNotes: s.quickNotes.filter((n) => n.id !== noteId),
+    }));
+  }, []);
+
+  const toggleRightSidebar = useCallback(() => {
+    setState((s) => ({ ...s, rightSidebarOpen: !s.rightSidebarOpen }));
+  }, []);
+
   const addWorkspaceTask = useCallback(
     (columnId, { content, priority }) => {
       const id = `task-${Date.now()}`;
@@ -599,6 +651,10 @@ export function DashboardProvider({ children }) {
       connectSynergy,
       setWorkspaceBoard,
       addWorkspaceTask,
+      toggleTaskDone,
+      addQuickNote,
+      removeQuickNote,
+      toggleRightSidebar,
     }),
     [
       state,
@@ -619,6 +675,10 @@ export function DashboardProvider({ children }) {
       connectSynergy,
       setWorkspaceBoard,
       addWorkspaceTask,
+      toggleTaskDone,
+      addQuickNote,
+      removeQuickNote,
+      toggleRightSidebar,
     ],
   );
 
