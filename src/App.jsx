@@ -9,12 +9,18 @@ import ApplicationsPage from './pages/dashboard/ApplicationsPage';
 import MentorsPage from './pages/dashboard/MentorsPage';
 import AIMatchPage from './pages/dashboard/AIMatchPage';
 import WorkspacePage from './pages/dashboard/WorkspacePage';
+import LoginPage from './components/auth/LoginPage';
+import RegisterPage from './components/auth/RegisterPage';
+import ProfilePage from './pages/ProfilePage';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<Navigate to="/dashboard/overview" replace />} />
           <Route path="overview" element={<OverviewPage />} />

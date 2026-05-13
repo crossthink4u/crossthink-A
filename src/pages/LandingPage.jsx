@@ -1,27 +1,27 @@
 import React from 'react';
-import Navbar from '../components/Navbar';
-import HeroSection from '../components/HeroSection';
-import FeaturesSection from '../components/FeaturesSection';
-import HowItWorks from '../components/HowItWorks';
-import AIMatching from '../components/AIMatching';
-import DashboardPreview from '../components/DashboardPreview';
-import StatsSection from '../components/StatsSection';
-import Testimonials from '../components/Testimonials';
-import CTASection from '../components/CTASection';
-import Footer from '../components/Footer';
+import Navbar from '../components/landing/Navbar';
+import HeroSection from '../components/landing/HeroSection';
+import WhatIsCrossThink from '../components/landing/WhatIsCrossThink';
+import HowItWorks from '../components/landing/HowItWorks';
+import FeaturesSection from '../components/landing/FeaturesSection';
+import DashboardPreview from '../components/landing/DashboardPreview';
+import WhyDifferent from '../components/landing/WhyDifferent';
+import AIShowcase from '../components/landing/AIShowcase';
+import CTASection from '../components/landing/CTASection';
+import Footer from '../components/landing/Footer';
 
 const LandingPage = () => {
   return (
-    <div className="min-h-screen antialiased selection:bg-blue-500/30 selection:text-blue-900 dark:selection:bg-cyan-500/30 dark:selection:text-cyan-100">
+    <div className="min-h-screen bg-[#050505] text-white antialiased selection:bg-cyan-500/30 selection:text-cyan-100">
       <Navbar />
       <main>
         <HeroSection />
-        <FeaturesSection />
+        <WhatIsCrossThink />
         <HowItWorks />
-        <AIMatching />
+        <FeaturesSection />
         <DashboardPreview />
-        <StatsSection />
-        <Testimonials />
+        <WhyDifferent />
+        <AIShowcase />
         <CTASection />
       </main>
       <Footer />
