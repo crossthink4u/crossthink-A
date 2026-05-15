@@ -79,3 +79,5 @@ CrossThink prioritizes **Visual Excellence**. The interface is designed to wow t
 ## 📜 License
 
 This project is licensed under the MIT License.
+
+ 
