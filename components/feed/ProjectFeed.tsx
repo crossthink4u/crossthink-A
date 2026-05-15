@@ -22,9 +22,8 @@ const ProjectCard = ({ project, bookmarked, onBookmark, onApply }) => {
             type="button"
             aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark project'}
             onClick={() => onBookmark(project.id)}
-            className={`absolute bottom-3 right-3 p-2 rounded-full backdrop-blur-md transition-colors border border-white/30 ${
-              bookmarked ? 'bg-white/30 text-yellow-200' : 'bg-white/10 hover:bg-white/20 text-white'
-            }`}
+            className={`absolute bottom-3 right-3 p-2 rounded-full backdrop-blur-md transition-colors border border-white/30 ${bookmarked ? 'bg-white/30 text-yellow-200' : 'bg-white/10 hover:bg-white/20 text-white'
+              }`}
           >
             <Bookmark className={`w-4 h-4 ${bookmarked ? 'fill-current' : ''}`} />
           </button>
@@ -68,7 +67,7 @@ const ProjectCard = ({ project, bookmarked, onBookmark, onApply }) => {
 };
 
 const ProjectsPage = () => {
-  
+
   const router = useRouter();
   const { projects, bookmarks, toggleBookmark, applyToProject, addProject } = useDashboard();
   const [activeFilter, setActiveFilter] = useState('All');
@@ -161,11 +160,10 @@ const ProjectsPage = () => {
             key={filter}
             type="button"
             onClick={() => setActiveFilter(filter)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-              activeFilter === filter
+            className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${activeFilter === filter
                 ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900 shadow-lg'
                 : 'bg-white dark:bg-white/5 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10'
-            }`}
+              }`}
           >
             {filter}
           </button>

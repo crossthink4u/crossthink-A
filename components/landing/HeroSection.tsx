@@ -134,11 +134,11 @@ const HeroSection = () => {
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => router.push('/register')}
+            onClick={() => router.push('/register?role=student')}
             className="group relative px-8 py-4 text-base font-semibold text-white bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full shadow-[0_0_30px_rgba(0,240,255,0.4)] hover:shadow-[0_0_50px_rgba(0,240,255,0.6)] transition-all duration-300 border border-cyan-400/30"
           >
             <span className="relative z-10 flex items-center justify-center gap-2">
-              Get Started
+              I am a Student
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </span>
           </motion.button>
@@ -146,19 +146,11 @@ const HeroSection = () => {
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => document.querySelector('#features')?.scrollIntoView({ behavior: 'smooth' })}
-            className="px-8 py-4 text-base font-semibold text-gray-300 rounded-full border border-white/10 hover:border-white/20 hover:bg-white/[0.04] transition-all duration-300"
-          >
-            Explore Projects
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
+            onClick={() => router.push('/register?role=mentor')}
             className="px-8 py-4 text-base font-semibold text-gray-300 rounded-full border border-white/10 hover:border-white/20 hover:bg-white/[0.04] transition-all duration-300 flex items-center justify-center gap-2"
           >
-            <Play className="w-4 h-4" />
-            Watch Demo
+            I am a Mentor
+            <ArrowRight className="w-5 h-5 text-gray-400" />
           </motion.button>
         </motion.div>
 
