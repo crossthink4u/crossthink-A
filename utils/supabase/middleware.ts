@@ -35,13 +35,18 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Here you can redirect users based on authentication status if you want to protect routes.
-  // Example:
-  // if (!user && !request.nextUrl.pathname.startsWith('/login') && !request.nextUrl.pathname.startsWith('/auth')) {
-  //   const url = request.nextUrl.clone()
-  //   url.pathname = '/login'
-  //   return NextResponse.redirect(url)
-  // }
+  // Redirect logged-in users away from landing/auth pages to the feed
+  if (user) {
+    if (
+      request.nextUrl.pathname === '/' ||
+      request.nextUrl.pathname.startsWith('/login') ||
+      request.nextUrl.pathname.startsWith('/register')
+    ) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/feed'
+      return NextResponse.redirect(url)
+    }
+  }
 
   return supabaseResponse
 }
