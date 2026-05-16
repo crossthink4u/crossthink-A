@@ -216,7 +216,7 @@ export default function ProjectDetailPage() {
                       </div>
                     </div>
                     <button
-                      onClick={() => router.push(`/projects/${project.id}/apply?role=${encodeURIComponent(role.title)}`)}
+                      onClick={() => router.push(`/register?role=student`)}
                       className={`flex-shrink-0 text-xs font-semibold px-4 py-2 rounded-lg bg-gradient-to-r ${accent.btnBg} text-white transition-all hover:opacity-90`}
                     >
                       Apply
@@ -292,7 +292,7 @@ export default function ProjectDetailPage() {
               </div>
 
               <button
-                onClick={() => router.push(`/projects/${project.id}/apply`)}
+                onClick={() => router.push(`/register?role=student`)}
                 className={`w-full py-3.5 rounded-xl font-semibold text-white bg-gradient-to-r ${accent.btnBg} ${accent.btnShadow} hover:opacity-90 transition-all duration-200 text-sm mb-3`}
               >
                 Apply to this project

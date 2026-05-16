@@ -11,24 +11,42 @@ import {
   ArrowRight,
   Zap,
   X,
+  LayoutGrid,
+  Brain,
+  Leaf,
+  TrendingUp,
+  Glasses,
+  GraduationCap,
+  Radio,
+  ShieldCheck,
+  Sparkles,
+  PlusCircle
 } from 'lucide-react';
 import { publicProjects, type Project } from '@/data/projects';
 
-const CATEGORIES = ['All', 'Machine Learning', 'Sustainability', 'FinTech', 'XR / Immersive', 'EdTech', 'IoT / Infrastructure'];
+const CATEGORY_TABS = [
+  { name: 'All', icon: LayoutGrid, color: 'text-blue-400' },
+  { name: 'Machine Learning', icon: Brain, color: 'text-blue-500' },
+  { name: 'Sustainability', icon: Leaf, color: 'text-emerald-400' },
+  { name: 'FinTech', icon: TrendingUp, color: 'text-purple-400' },
+  { name: 'XR / Immersive', icon: Glasses, color: 'text-cyan-400' },
+  { name: 'EdTech', icon: GraduationCap, color: 'text-amber-400' },
+  { name: 'IoT / Infrastructure', icon: Radio, color: 'text-pink-400' },
+];
 
 const DIFFICULTY_COLORS: Record<string, string> = {
-  Beginner:     'text-emerald-400',
+  Beginner: 'text-emerald-400',
   Intermediate: 'text-amber-400',
-  Advanced:     'text-rose-400',
+  Advanced: 'text-rose-400',
 };
 
 const ACCENT_COLORS: Record<string, string> = {
-  cyan:    '#00f0ff',
+  cyan: '#00f0ff',
   emerald: '#10b981',
-  amber:   '#f59e0b',
-  violet:  '#8b5cf6',
-  pink:    '#ec4899',
-  sky:     '#0ea5e9',
+  amber: '#f59e0b',
+  violet: '#8b5cf6',
+  pink: '#ec4899',
+  sky: '#0ea5e9',
 };
 
 function ProjectCard({ project, index }: { project: Project; index: number }) {
@@ -187,23 +205,63 @@ export default function ProjectsPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
 
         {/* Page header */}
-        <div className="flex items-start justify-between gap-4 mb-8">
-          <div>
-            <div className="flex items-center gap-2.5 mb-1">
-              <h1 className="font-display text-2xl font-bold text-white">Open Projects</h1>
-              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/[0.08] text-gray-500">
-                {totalOpen} roles available
-              </span>
+        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
+          {/* Left Side */}
+          <div className="space-y-4 relative z-10">
+            {/* Roles badge */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0a1128] border border-blue-500/20 text-blue-300 text-xs font-medium mb-2">
+              <Users className="w-3.5 h-3.5" />
+              {totalOpen} roles available
             </div>
-            <p className="text-gray-600 text-sm">Real teams, real work — no login required to browse.</p>
+
+            {/* Title */}
+            <div className="flex items-center gap-3">
+              <h1 className="font-display text-4xl md:text-5xl font-bold text-white tracking-tight">
+                Explore <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent">Open Projects</span>
+              </h1>
+              <Sparkles className="w-6 h-6 text-purple-400" />
+            </div>
+
+            {/* Subtitle */}
+            <p className="text-gray-400 text-base">
+              Real teams, real impact — no login required to browse.
+            </p>
+
+            {/* Bullet points */}
+            <div className="flex flex-wrap items-center gap-4 pt-2">
+              <div className="flex items-center gap-2 text-sm text-gray-300">
+                <ShieldCheck className="w-4 h-4 text-cyan-400" />
+                Real-world impact
+              </div>
+              <div className="w-px h-4 bg-white/[0.1]" />
+              <div className="flex items-center gap-2 text-sm text-gray-300">
+                <Users className="w-4 h-4 text-purple-400" />
+                Collaborate remotely
+              </div>
+              <div className="w-px h-4 bg-white/[0.1]" />
+              <div className="flex items-center gap-2 text-sm text-gray-300">
+                <Zap className="w-4 h-4 text-blue-400" />
+                Build your portfolio
+              </div>
+            </div>
           </div>
-          <button
-            onClick={() => router.push('/register?role=student')}
-            className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:opacity-90 transition-opacity"
-          >
-            <span className="text-base leading-none">+</span>
-            Add a Project
-          </button>
+
+          {/* Right Side CTA */}
+          <div className="relative flex-shrink-0 z-10">
+            <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 blur-xl rounded-full opacity-50 pointer-events-none" />
+            
+            {/* Decorative swoosh */}
+            <div className="absolute -left-12 -top-6 w-24 h-24 border-t border-l border-blue-500/30 rounded-tl-full opacity-50" />
+            <div className="absolute -left-2 top-8 w-2 h-2 bg-blue-400 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.8)]" />
+
+            <button
+              onClick={() => router.push('/register?role=student')}
+              className="relative flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 transition-all shadow-[0_0_30px_rgba(99,102,241,0.4)]"
+            >
+              <PlusCircle className="w-5 h-5" />
+              Add a Project
+            </button>
+          </div>
         </div>
 
         {/* Mobile search */}
@@ -218,20 +276,25 @@ export default function ProjectsPage() {
         </div>
 
         {/* Category filters */}
-        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-1 scrollbar-hide">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setCategory(cat)}
-              className={`flex-shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg transition-all duration-150 ${
-                category === cat
-                  ? 'bg-white/[0.10] text-white border border-white/[0.12]'
-                  : 'text-gray-500 hover:text-gray-300 hover:bg-white/[0.04]'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+        <div className="flex items-center gap-3 mb-8 overflow-x-auto pb-4 scrollbar-hide">
+          {CATEGORY_TABS.map((cat) => {
+            const Icon = cat.icon;
+            const isActive = category === cat.name;
+            return (
+              <button
+                key={cat.name}
+                onClick={() => setCategory(cat.name)}
+                className={`flex items-center gap-2 flex-shrink-0 text-sm font-medium px-4 py-2.5 rounded-xl border transition-all duration-300 ${
+                  isActive
+                    ? 'bg-[#0a0a1a] text-white border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.15)]'
+                    : 'bg-transparent text-gray-400 border-white/[0.08] hover:border-white/[0.15] hover:bg-white/[0.02]'
+                }`}
+              >
+                <Icon className={`w-4 h-4 ${isActive ? cat.color : 'text-current opacity-70'}`} />
+                {cat.name}
+              </button>
+            );
+          })}
         </div>
 
         {/* Grid */}
