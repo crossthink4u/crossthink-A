@@ -367,14 +367,26 @@ function computeSynergyMatch(skillProfile, strengths) {
 const DashboardContext = createContext(null);
 
 export function DashboardProvider({ children }) {
-  const [state, setState] = useState(loadState);
+  const [state, setState] = useState(getDefaultState);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     if (typeof window === 'undefined') return;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        setState(mergeDefaults(JSON.parse(raw)));
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || typeof window === 'undefined') return;
     const persist = { ...state };
     delete persist.toast;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(persist));
-  }, [state]);
+  }, [state, mounted]);
 
   const dismissToast = useCallback(() => {
     setState((s) => ({ ...s, toast: null }));
