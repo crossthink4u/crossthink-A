@@ -32,7 +32,7 @@ const LoginPage = () => {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
             <div className="flex items-center justify-center gap-2 mb-8">
               <Hexagon className="w-10 h-10 text-cyan-400" fill="currentColor" fillOpacity={0.15} />
-              <span className="font-display font-bold text-3xl text-white">Cross<span className="text-gradient">Think</span></span>
+              <span className="font-display font-bold text-3xl text-white">Cross<span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">Think</span></span>
             </div>
             <h2 className="text-3xl font-display font-bold text-white mb-4">Welcome Back</h2>
             <p className="text-gray-400 text-base leading-relaxed max-w-sm mx-auto">Continue building the future with your team. Your projects are waiting.</p>
@@ -48,7 +48,7 @@ const LoginPage = () => {
           {/* Mobile logo */}
           <div className="flex items-center gap-2 mb-8 lg:hidden">
             <Hexagon className="w-8 h-8 text-cyan-400" fill="currentColor" fillOpacity={0.15} />
-            <span className="font-display font-bold text-xl text-white">Cross<span className="text-gradient">Think</span></span>
+            <span className="font-display font-bold text-xl text-white">Cross<span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">Think</span></span>
           </div>
 
           <h1 className="text-2xl font-display font-bold text-white mb-2">Sign In</h1>

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { DashboardProvider } from '@/context/DashboardContext';
-import Navbar from '@/components/landing/Navbar';
+import ConditionalNavbar from '@/components/layout/ConditionalNavbar';
 
 export const metadata: Metadata = {
   title: 'CrossThink — Where Ideas Meet Talent',
@@ -25,7 +25,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-[#050505]">
         <DashboardProvider>
-          <Navbar />
+          <ConditionalNavbar />
           {children}
         </DashboardProvider>
       </body>

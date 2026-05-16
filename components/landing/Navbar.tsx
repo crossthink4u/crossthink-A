@@ -67,6 +67,12 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1">
             <button
+              onClick={() => router.push('/')}
+              className="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors duration-300 rounded-lg hover:bg-white/[0.04]"
+            >
+              Projects
+            </button>
+            <button
               onClick={() => router.push('/feed')}
               className="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors duration-300 rounded-lg hover:bg-white/[0.04]"
             >
@@ -129,6 +135,12 @@ const Navbar = () => {
             className="md:hidden bg-[#0a0a0a]/95 backdrop-blur-xl border-b border-white/[0.06] overflow-hidden"
           >
             <div className="px-4 pt-2 pb-6 space-y-1">
+              <button
+                onClick={() => { setMobileMenuOpen(false); router.push('/'); }}
+                className="block w-full text-left px-4 py-3.5 text-base font-medium text-gray-300 hover:text-white hover:bg-white/[0.04] rounded-xl transition-colors"
+              >
+                Projects
+              </button>
               <button
                 onClick={() => { setMobileMenuOpen(false); router.push('/feed'); }}
                 className="block w-full text-left px-4 py-3.5 text-base font-medium text-gray-300 hover:text-white hover:bg-white/[0.04] rounded-xl transition-colors"
