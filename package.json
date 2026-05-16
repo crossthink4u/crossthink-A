@@ -1,7 +1,7 @@
 {
   "name": "crossthink",
   "version": "1.0.0",
-  "private": true ,
+  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.105.4",
     "clsx": "^2.1.1",
     "framer-motion": "^12.7.4",
     "lucide-react": "^0.474.0",
