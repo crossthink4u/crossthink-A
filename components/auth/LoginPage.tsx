@@ -2,19 +2,38 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Hexagon, Eye, EyeOff, Mail, User, Lock, ArrowRight, GitBranch, Globe } from 'lucide-react';
+import { Hexagon, Eye, EyeOff, Mail, User, Lock, ArrowRight, GitBranch, Globe, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/utils/supabase/client';
 import ParticleField from '@/components/landing/ParticleField';
 
 const LoginPage = () => {
   const router = useRouter();
+  const supabase = createClient();
   const [loginMode, setLoginMode] = useState('email');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [form, setForm] = useState({ identifier: '', password: '' });
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email: form.identifier,
+      password: form.password,
+    });
+
+    setLoading(false);
+
+    if (authError) {
+      setError(authError.message);
+      return;
+    }
+
     router.push('/dashboard');
   };
 
@@ -53,6 +72,14 @@ const LoginPage = () => {
 
           <h1 className="text-2xl font-display font-bold text-white mb-2">Sign In</h1>
           <p className="text-gray-500 text-sm mb-8">Enter your credentials to access your account</p>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <p>{error}</p>
+            </div>
+          )}
 
           {/* Login mode toggle */}
           <div className="flex gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] mb-6">
@@ -118,9 +145,9 @@ const LoginPage = () => {
             </div>
 
             {/* Submit */}
-            <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }} type="submit"
-              className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-xl shadow-[0_0_25px_rgba(0,240,255,0.3)] hover:shadow-[0_0_40px_rgba(0,240,255,0.5)] transition-all duration-300 flex items-center justify-center gap-2 text-sm">
-              Sign In <ArrowRight className="w-4 h-4" />
+            <motion.button disabled={loading} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }} type="submit"
+              className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-xl shadow-[0_0_25px_rgba(0,240,255,0.3)] hover:shadow-[0_0_40px_rgba(0,240,255,0.5)] transition-all duration-300 flex items-center justify-center gap-2 text-sm disabled:opacity-50">
+              {loading ? 'Signing in...' : 'Sign In'} {!loading && <ArrowRight className="w-4 h-4" />}
             </motion.button>
           </form>
 

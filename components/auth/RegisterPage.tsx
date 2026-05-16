@@ -17,6 +17,7 @@ import {
   Globe,
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { createClient } from '@/utils/supabase/client';
 
 type Role = 'student' | 'mentor';
 
@@ -56,6 +57,7 @@ const inputCls = 'w-full bg-white/[0.04] border border-white/[0.10] rounded-xl p
 const RegisterForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const supabase = createClient();
 
   const [step, setStep] = useState<1 | 2>(1);
   const [showPw, setShowPw] = useState(false);
@@ -104,14 +106,37 @@ const RegisterForm = () => {
 
   const handleStep1 = () => { if (validateStep1()) setStep(2); };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setDone(true);
-      setTimeout(() => router.push('/feed'), 1600);
-    }, 2000);
+    
+    const { error } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.password,
+      options: {
+        data: {
+          full_name: form.fullName,
+          role: form.role,
+          university: form.university,
+          major: form.major,
+          year: form.year,
+          expertise: form.expertise,
+          years_exp: form.yearsExp,
+          organization: form.organization,
+        },
+      },
+    });
+
+    setLoading(false);
+
+    if (error) {
+      setErrors({ email: error.message });
+      setStep(1); // Go back to step 1 to show the error
+      return;
+    }
+
+    setDone(true);
+    setTimeout(() => router.push('/feed'), 1600);
   };
 
   const slideVariants = {
