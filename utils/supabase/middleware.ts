@@ -35,17 +35,31 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Redirect logged-in users away from landing/auth pages to the feed
+  const { pathname } = request.nextUrl
+
+  // Redirect logged-in users away from auth pages to the feed
   if (user) {
     if (
-      request.nextUrl.pathname === '/' ||
-      request.nextUrl.pathname.startsWith('/login') ||
-      request.nextUrl.pathname.startsWith('/register')
+      pathname === '/login' ||
+      pathname.startsWith('/register')
     ) {
       const url = request.nextUrl.clone()
       url.pathname = '/feed'
       return NextResponse.redirect(url)
     }
+  }
+
+  // Protect authenticated-only routes
+  const protectedRoutes = ['/feed', '/profile', '/dashboard', '/workspace']
+  const isProtected = protectedRoutes.some(
+    (route) => pathname === route || pathname.startsWith(route + '/')
+  )
+
+  if (!user && isProtected) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    url.searchParams.set('redirectTo', pathname)
+    return NextResponse.redirect(url)
   }
 
   return supabaseResponse

@@ -93,27 +93,15 @@ const Navbar = () => {
           <nav className="hidden md:flex items-center gap-1">
             <button
               onClick={() => router.push('/')}
-              className="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors duration-300 rounded-lg hover:bg-white/[0.04]"
+              className={`px-4 py-2 text-sm font-medium transition-colors duration-300 rounded-lg hover:bg-white/[0.04] ${pathname === '/' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
             >
               Projects
             </button>
             <button
               onClick={() => router.push('/feed')}
-              className="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors duration-300 rounded-lg hover:bg-white/[0.04]"
+              className={`px-4 py-2 text-sm font-medium transition-colors duration-300 rounded-lg hover:bg-white/[0.04] ${pathname === '/feed' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
             >
               Feed
-            </button>
-            <button
-              onClick={() => router.push('/dashboard/workspace')}
-              className="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors duration-300 rounded-lg hover:bg-white/[0.04]"
-            >
-              Workspace
-            </button>
-            <button
-              onClick={() => router.push('/profile')}
-              className="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors duration-300 rounded-lg hover:bg-white/[0.04]"
-            >
-              Profile
             </button>
           </nav>
 
@@ -230,18 +218,6 @@ const Navbar = () => {
                 className="block w-full text-left px-4 py-3.5 text-base font-medium text-gray-300 hover:text-white hover:bg-white/[0.04] rounded-xl transition-colors"
               >
                 Feed
-              </button>
-              <button
-                onClick={() => { setMobileMenuOpen(false); router.push('/dashboard/workspace'); }}
-                className="block w-full text-left px-4 py-3.5 text-base font-medium text-gray-300 hover:text-white hover:bg-white/[0.04] rounded-xl transition-colors"
-              >
-                Workspace
-              </button>
-              <button
-                onClick={() => { setMobileMenuOpen(false); router.push('/profile'); }}
-                className="block w-full text-left px-4 py-3.5 text-base font-medium text-gray-300 hover:text-white hover:bg-white/[0.04] rounded-xl transition-colors"
-              >
-                Profile
               </button>
               <div className="pt-4 flex flex-col gap-3 px-3 border-t border-white/5 mt-2">
                 {user ? (

@@ -3,12 +3,13 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Hexagon, Eye, EyeOff, Mail, User, Lock, ArrowRight, GitBranch, Globe, AlertCircle } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import ParticleField from '@/components/landing/ParticleField';
 
 const LoginPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
   const [loginMode, setLoginMode] = useState('email');
   const [showPassword, setShowPassword] = useState(false);
@@ -34,7 +35,8 @@ const LoginPage = () => {
       return;
     }
 
-    router.push('/dashboard');
+    const redirectTo = searchParams.get('redirectTo') || '/feed';
+    router.push(redirectTo);
   };
 
   return (
@@ -101,7 +103,7 @@ const LoginPage = () => {
                 {loginMode === 'email' ? 'Email Address' : 'Username'}
               </label>
               <div className="relative">
-                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
                   {loginMode === 'email' ? <Mail className="w-4 h-4" /> : <User className="w-4 h-4" />}
                 </div>
                 <input
@@ -109,7 +111,7 @@ const LoginPage = () => {
                   placeholder={loginMode === 'email' ? 'you@university.edu' : 'your_username'}
                   value={form.identifier}
                   onChange={(e) => setForm({ ...form, identifier: e.target.value })}
-                  className="auth-input pl-11"
+                  className="w-full bg-white/[0.04] border border-white/[0.10] rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500/40 transition-all"
                 />
               </div>
             </div>
@@ -121,13 +123,15 @@ const LoginPage = () => {
                 <button type="button" className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors">Forgot Password?</button>
               </div>
               <div className="relative">
-                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500"><Lock className="w-4 h-4" /></div>
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                  <Lock className="w-4 h-4" />
+                </div>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Enter your password"
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  className="auth-input pl-11 pr-11"
+                  className="w-full bg-white/[0.04] border border-white/[0.10] rounded-xl pl-10 pr-11 py-3 text-sm text-white placeholder-gray-600 outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500/40 transition-all"
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors">
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

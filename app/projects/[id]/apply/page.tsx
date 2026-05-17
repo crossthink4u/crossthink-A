@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -17,8 +17,10 @@ import {
   Globe,
   Sparkles,
   Send,
+  ShieldCheck,
 } from 'lucide-react';
 import { getProjectById } from '@/data/projects';
+import { createClient } from '@/utils/supabase/client';
 
 const accentMap: Record<string, { gradient: string; btnBg: string; btnShadow: string; ring: string; dot: string }> = {
   cyan:    { gradient: 'from-cyan-400 to-blue-500',     btnBg: 'from-cyan-500 to-blue-600',     btnShadow: 'shadow-[0_0_24px_rgba(0,240,255,0.35)]',   ring: 'focus:ring-cyan-500/40',    dot: 'bg-cyan-400' },
@@ -55,12 +57,15 @@ export default function ApplyPage() {
   const { id } = useParams<{ id: string }>();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const supabase = createClient();
 
-  const project = getProjectById(id);
+  const hardcoded = getProjectById(id);
   const prefilledRole = searchParams.get('role') ?? '';
 
   const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
+  const [authedName, setAuthedName] = useState('');
+  const [dbTitle, setDbTitle] = useState('');
   const [form, setForm] = useState<FormData>({
     name: '',
     email: '',
@@ -74,18 +79,34 @@ export default function ApplyPage() {
     motivation: '',
   });
 
-  if (!project) {
-    return (
-      <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center gap-4">
-        <p className="text-gray-400">Project not found.</p>
-        <button onClick={() => router.push('/')} className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1.5">
-          <ArrowLeft className="w-4 h-4" /> Go home
-        </button>
-      </div>
-    );
-  }
+  useEffect(() => {
+    // Pre-fill from auth
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      const meta = user.user_metadata ?? {};
+      const fullName = meta.full_name || '';
+      setAuthedName(fullName);
+      setForm((f) => ({
+        ...f,
+        name: fullName || f.name,
+        email: user.email || f.email,
+        major: meta.major || f.major,
+        techStack: Array.isArray(meta.expertise)
+          ? meta.expertise.join(', ')
+          : meta.expertise || f.techStack,
+      }));
+    });
 
-  const accent = accentMap[project.accentColor] ?? accentMap.cyan;
+    // If not a hardcoded project, fetch title from Supabase
+    if (!hardcoded) {
+      supabase.from('projects').select('title').eq('id', id).single()
+        .then(({ data }) => { if (data) setDbTitle(data.title); });
+    }
+  }, []);
+
+  const project = hardcoded;
+  const projectTitle = project?.title ?? dbTitle ?? 'this project';
+  const accent = accentMap[project?.accentColor ?? 'cyan'] ?? accentMap.cyan;
 
   const set = (field: keyof FormData) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -96,8 +117,24 @@ export default function ApplyPage() {
     return true;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const { data: { user } } = await supabase.auth.getUser();
+    await supabase.from('applications').insert({
+      project_id: id,
+      applicant_user_id: user?.id ?? null,
+      name: form.name,
+      email: form.email,
+      role: form.role || null,
+      major: form.major || null,
+      tech_stack: form.techStack || null,
+      github: form.github || null,
+      linkedin: form.linkedin || null,
+      portfolio: form.portfolio || null,
+      prev_projects: form.prevProjects || null,
+      motivation: form.motivation || null,
+      status: 'pending',
+    });
     setSubmitted(true);
   };
 
@@ -121,14 +158,14 @@ export default function ApplyPage() {
           <h1 className="font-display text-3xl font-bold text-white mb-3">Application sent!</h1>
           <p className="text-gray-400 mb-2">
             Thanks, <span className="text-white">{form.name}</span>. Your application for{' '}
-            <span className="text-white">{project.title}</span> is on its way.
+            <span className="text-white">{projectTitle}</span> is on its way.
           </p>
           <p className="text-sm text-gray-600 mb-10">
             The project lead will reach out at <span className="text-gray-400">{form.email}</span> within a few days.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
-              onClick={() => router.push(`/projects/${project.id}`)}
+              onClick={() => router.push(`/projects/${id}`)}
               className="px-6 py-2.5 rounded-xl border border-white/10 text-gray-300 hover:text-white hover:border-white/20 hover:bg-white/[0.04] transition-all text-sm"
             >
               Back to project
@@ -147,7 +184,7 @@ export default function ApplyPage() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white antialiased selection:bg-cyan-500/30 selection:text-cyan-100">
-      <div className="h-0.5 w-full" style={{ background: project.gradient }} />
+      <div className="h-0.5 w-full" style={{ background: project?.gradient ?? 'linear-gradient(90deg,#06b6d4,#3b82f6)' }} />
 
       {/* Navbar */}
       <header className="sticky top-0 z-40 bg-[#050505]/80 backdrop-blur-xl border-b border-white/[0.06]">
@@ -161,7 +198,7 @@ export default function ApplyPage() {
             </span>
           </button>
           <button
-            onClick={() => router.push(`/projects/${project.id}`)}
+            onClick={() => router.push(`/projects/${id}`)}
             className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -181,12 +218,12 @@ export default function ApplyPage() {
         >
           <div className="flex items-center gap-2 mb-1.5">
             <span className={`w-2 h-2 rounded-full ${accent.dot}`} />
-            <span className="text-sm text-gray-500 font-medium">{project.category}</span>
+            <span className="text-sm text-gray-500 font-medium">{project?.category ?? 'Project'}</span>
           </div>
           <h1 className="font-display text-3xl sm:text-4xl font-bold text-white mb-2">
             Apply to{' '}
             <span className={`bg-gradient-to-r ${accent.gradient} bg-clip-text text-transparent`}>
-              {project.title}
+              {projectTitle}
             </span>
           </h1>
           <p className="text-gray-500 text-sm">No account needed · Takes about 2 minutes · Most fields are optional</p>
@@ -238,6 +275,13 @@ export default function ApplyPage() {
                     <span className="ml-auto text-xs text-gray-600">* required</span>
                   </div>
 
+                  {authedName && (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs">
+                      <ShieldCheck className="w-3.5 h-3.5 flex-shrink-0" />
+                      Signed in as <span className="font-semibold">{authedName}</span> — fields pre-filled from your profile
+                    </div>
+                  )}
+
                   <div>
                     <label className="block text-xs font-medium text-gray-400 mb-1.5">
                       Full name <span className="text-rose-400">*</span>
@@ -272,7 +316,7 @@ export default function ApplyPage() {
                   <div>
                     <label className="block text-xs font-medium text-gray-400 mb-1.5">
                       Which role are you applying for?
-                      {project.openRoles.length === 1 ? '' : ' (optional)'}
+                      {(project?.openRoles?.length ?? 0) !== 1 ? ' (optional)' : ''}
                     </label>
                     <select
                       value={form.role}
@@ -280,7 +324,7 @@ export default function ApplyPage() {
                       className={`${inputCls(accent.ring)} appearance-none`}
                     >
                       <option value="">I'm open to any role</option>
-                      {project.openRoles.map((r) => (
+                      {(project?.openRoles ?? []).map((r) => (
                         <option key={r.title} value={r.title}>{r.title}</option>
                       ))}
                     </select>
@@ -326,7 +370,9 @@ export default function ApplyPage() {
                       placeholder="e.g. React, Python, Figma, PyTorch..."
                       className={inputCls(accent.ring)}
                     />
-                    <p className="text-xs text-gray-600 mt-1.5">Comma-separated. The project uses: {project.tech.slice(0, 3).join(', ')}{project.tech.length > 3 ? ', ...' : '.'}</p>
+                    {project?.tech?.length > 0 && (
+                      <p className="text-xs text-gray-600 mt-1.5">Comma-separated. The project uses: {project.tech.slice(0, 3).join(', ')}{project.tech.length > 3 ? ', ...' : '.'}</p>
+                    )}
                   </div>
 
                   <div>
@@ -404,7 +450,7 @@ export default function ApplyPage() {
                       rows={4}
                       value={form.motivation}
                       onChange={set('motivation')}
-                      placeholder={`Tell the team what excites you about "${project.title}" and what you'd bring to it. Keep it natural.`}
+                      placeholder={`Tell the team what excites you about "${projectTitle}" and what you'd bring to it. Keep it natural.`}
                       className={`${inputCls(accent.ring)} resize-none`}
                     />
                   </div>
@@ -465,7 +511,7 @@ export default function ApplyPage() {
         {/* Footer note */}
         <p className="text-center text-xs text-gray-700 mt-10">
           By applying you agree to have your details shared with the project lead.
-          No account is created. You can create one later to track your application.
+          {authedName ? ' Your application will be linked to your CrossThink account.' : ' No account required — you can create one later to track your application.'}
         </p>
       </div>
     </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import {
@@ -20,9 +20,15 @@ import {
   Radio,
   ShieldCheck,
   Sparkles,
-  PlusCircle
+  PlusCircle,
+  User as UserIcon,
+  LogOut,
+  Rss,
 } from 'lucide-react';
 import { publicProjects, type Project } from '@/data/projects';
+import { createClient } from '@/utils/supabase/client';
+import type { User } from '@supabase/supabase-js';
+import type { DbProject } from '@/types/database';
 
 const CATEGORY_TABS = [
   { name: 'All', icon: LayoutGrid, color: 'text-blue-400' },
@@ -133,10 +139,115 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
   );
 }
 
+function DbProjectCard({ project, index }: { project: DbProject; index: number }) {
+  const router = useRouter();
+  const openCount = (project.open_roles ?? []).reduce((s: number, r: { count: number }) => s + r.count, 0);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.3, delay: index * 0.04, ease: 'easeOut' }}
+      layout
+      onClick={() => router.push(`/projects/${project.id}`)}
+      className="group flex flex-col rounded-xl bg-[#0d0d0d] border border-white/[0.07] hover:border-white/[0.14] transition-all duration-200 overflow-hidden hover:bg-[#111] cursor-pointer"
+    >
+      {/* Image / placeholder */}
+      <div className="relative h-40 w-full overflow-hidden flex-shrink-0 bg-[#0a0a0a]">
+        {project.image_url ? (
+          <img src={project.image_url} alt={project.title}
+            className="w-full h-full object-cover opacity-70 group-hover:opacity-85 group-hover:scale-105 transition-all duration-500" />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-cyan-500/10 via-blue-600/10 to-purple-600/10 flex items-center justify-center">
+            <Sparkles className="w-8 h-8 text-white/10" />
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d0d] via-[#0d0d0d]/20 to-transparent" />
+        <div className="absolute top-2.5 left-2.5 text-[10px] font-semibold px-2 py-1 rounded-md bg-cyan-500/20 text-cyan-400 border border-cyan-500/20 backdrop-blur-sm">
+          Community
+        </div>
+        {openCount > 0 && (
+          <div className="absolute top-2.5 right-2.5 flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-md bg-black/60 backdrop-blur-sm text-cyan-400">
+            <Zap className="w-3 h-3" />{openCount} open
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col flex-1 p-4 gap-3">
+        <div>
+          <p className="text-[10px] font-medium text-gray-600 uppercase tracking-wider mb-1">{project.dept || 'Project'}</p>
+          <h3 className="font-display font-semibold text-[14px] text-white leading-snug line-clamp-2">{project.title}</h3>
+        </div>
+
+        {project.tech.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {project.tech.slice(0, 3).map((t) => (
+              <span key={t} className="text-[11px] px-2 py-0.5 rounded-md bg-white/[0.05] text-gray-500 font-medium">{t}</span>
+            ))}
+            {project.tech.length > 3 && (
+              <span className="text-[11px] px-2 py-0.5 rounded-md bg-white/[0.05] text-gray-600 font-medium">+{project.tech.length - 3}</span>
+            )}
+          </div>
+        )}
+
+        <div className="flex items-center gap-3 text-[11px] text-gray-600">
+          {project.duration && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{project.duration}</span>}
+          {project.difficulty && (
+            <span className={DIFFICULTY_COLORS[project.difficulty] ?? 'text-gray-400'}>{project.difficulty}</span>
+          )}
+        </div>
+
+        <button
+          onClick={(e) => { e.stopPropagation(); router.push(`/projects/${project.id}`); }}
+          className="mt-auto w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold border border-white/[0.08] text-gray-300 hover:text-white hover:border-white/[0.18] hover:bg-white/[0.05] transition-all duration-150"
+        >
+          View / Apply <ArrowRight className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function ProjectsPage() {
   const router = useRouter();
+  const supabase = createClient();
   const [category, setCategory] = useState('All');
   const [search, setSearch] = useState('');
+  const [user, setUser] = useState<User | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [dbProjects, setDbProjects] = useState<DbProject[]>([]);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Load community projects from Supabase
+    supabase
+      .from('projects')
+      .select('*')
+      .eq('is_public', true)
+      .order('created_at', { ascending: false })
+      .then(({ data }) => setDbProjects((data as DbProject[]) ?? []));
+
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-profile-menu]')) setDropdownOpen(false);
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => {
+      subscription.unsubscribe();
+      document.removeEventListener('mousedown', handleClick);
+    };
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setDropdownOpen(false);
+  };
 
   const filtered = publicProjects.filter((p) => {
     const matchCat = category === 'All' || p.category === category;
@@ -150,7 +261,18 @@ export default function ProjectsPage() {
     return matchCat && matchSearch;
   });
 
-  const totalOpen = publicProjects.reduce((a, p) => a + p.openRoles.reduce((s, r) => s + r.count, 0), 0);
+  const filteredDb = dbProjects.filter((p) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (
+      p.title.toLowerCase().includes(q) ||
+      (p.dept ?? '').toLowerCase().includes(q) ||
+      p.tech.some((t) => t.toLowerCase().includes(q))
+    );
+  });
+
+  const dbOpen = dbProjects.reduce((a, p) => a + (p.open_roles ?? []).reduce((s: number, r: { count: number }) => s + r.count, 0), 0);
+  const totalOpen = publicProjects.reduce((a, p) => a + p.openRoles.reduce((s, r) => s + r.count, 0), 0) + dbOpen;
 
   return (
     <div className="min-h-screen bg-[#080808] text-white antialiased selection:bg-cyan-500/20">
@@ -186,18 +308,74 @@ export default function ProjectsPage() {
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
-            <button
-              onClick={() => router.push('/login')}
-              className="text-sm text-gray-400 hover:text-white transition-colors px-3 py-1.5"
-            >
-              Sign in
-            </button>
-            <button
-              onClick={() => router.push('/register?role=student')}
-              className="text-sm font-semibold text-white bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-1.5 rounded-lg hover:opacity-90 transition-opacity"
-            >
-              Join free
-            </button>
+            {user ? (
+              <div className="relative" data-profile-menu>
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors focus:outline-none"
+                >
+                  {user.user_metadata?.full_name ? (
+                    <span className="text-sm font-semibold text-white">
+                      {user.user_metadata.full_name.charAt(0).toUpperCase()}
+                    </span>
+                  ) : (
+                    <UserIcon className="w-4 h-4 text-gray-300" />
+                  )}
+                </button>
+
+                <AnimatePresence>
+                  {dropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-52 bg-[#0d0d0d] border border-white/10 rounded-xl shadow-2xl overflow-hidden py-1.5 z-50"
+                    >
+                      <div className="px-4 py-2.5 border-b border-white/5 mb-1">
+                        <p className="text-xs font-semibold text-white truncate">
+                          {user.user_metadata?.full_name || 'User'}
+                        </p>
+                        <p className="text-[11px] text-gray-500 truncate">{user.email}</p>
+                      </div>
+                      <button
+                        onClick={() => { setDropdownOpen(false); router.push('/feed'); }}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 flex items-center gap-2 transition-colors"
+                      >
+                        <Rss className="w-3.5 h-3.5" /> Feed
+                      </button>
+                      <button
+                        onClick={() => { setDropdownOpen(false); router.push('/profile'); }}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 flex items-center gap-2 transition-colors"
+                      >
+                        <UserIcon className="w-3.5 h-3.5" /> Profile
+                      </button>
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full text-left px-4 py-2 text-sm text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 flex items-center gap-2 transition-colors mt-0.5 border-t border-white/5"
+                      >
+                        <LogOut className="w-3.5 h-3.5" /> Sign Out
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <>
+                <button
+                  onClick={() => router.push('/login')}
+                  className="text-sm text-gray-400 hover:text-white transition-colors px-3 py-1.5"
+                >
+                  Sign in
+                </button>
+                <button
+                  onClick={() => router.push('/register?role=student')}
+                  className="text-sm font-semibold text-white bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-1.5 rounded-lg hover:opacity-90 transition-opacity"
+                >
+                  Join free
+                </button>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -274,6 +452,24 @@ export default function ProjectsPage() {
             className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-8 pr-3 py-2 text-sm text-white placeholder-gray-600 outline-none focus:border-white/[0.16] transition-colors"
           />
         </div>
+
+        {/* Community projects from DB */}
+        {filteredDb.length > 0 && (
+          <div className="mb-10">
+            <div className="flex items-center gap-2 mb-4">
+              <h2 className="text-sm font-semibold text-white">Community Projects</h2>
+              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">{filteredDb.length} new</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <AnimatePresence>
+                {filteredDb.map((p, i) => (
+                  <DbProjectCard key={p.id} project={p} index={i} />
+                ))}
+              </AnimatePresence>
+            </div>
+            <div className="mt-6 border-t border-white/[0.06]" />
+          </div>
+        )}
 
         {/* Category filters */}
         <div className="flex items-center gap-3 mb-8 overflow-x-auto pb-4 scrollbar-hide">
