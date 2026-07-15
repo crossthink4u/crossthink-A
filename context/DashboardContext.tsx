@@ -702,7 +702,6 @@ export function DashboardProvider({ children }) {
 }
 
 // Hook colocated with provider for this app slice (dashboard-only).
-// eslint-disable-next-line react-refresh/only-export-components -- useDashboard is stable alongside Provider
 export function useDashboard() {
   const ctx = useContext(DashboardContext);
   if (!ctx) throw new Error('useDashboard must be used within DashboardProvider');

@@ -274,7 +274,7 @@ export default function DiscoverProjects() {
             onClick={() => router.push('/register?role=student')}
             className="inline-flex items-center gap-2 px-7 py-3 rounded-full font-semibold text-white bg-gradient-to-r from-cyan-500 to-blue-600 shadow-[0_0_20px_rgba(0,240,255,0.25)] hover:shadow-[0_0_35px_rgba(0,240,255,0.4)] transition-all duration-300 text-sm"
           >
-            Join CrossThink — it's free
+            Join CrossThink — it&apos;s free
             <ArrowRight className="w-4 h-4" />
           </button>
         </motion.div>

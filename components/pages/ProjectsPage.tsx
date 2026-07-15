@@ -217,6 +217,7 @@ export default function ProjectsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [dbProjects, setDbProjects] = useState<DbProject[]>([]);
+  const [dbError, setDbError] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
@@ -230,7 +231,17 @@ export default function ProjectsPage() {
       .select('*')
       .eq('is_public', true)
       .order('created_at', { ascending: false })
-      .then(({ data }) => setDbProjects((data as DbProject[]) ?? []));
+      .then(
+        ({ data, error }) => {
+          if (error) {
+            setDbError(error.message);
+          } else {
+            setDbError(null);
+            setDbProjects((data as DbProject[]) ?? []);
+          }
+        },
+        (err: Error) => setDbError(err.message)
+      );
 
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -454,77 +465,86 @@ export default function ProjectsPage() {
         </div>
 
         {/* Community projects from DB */}
-        {filteredDb.length > 0 && (
-          <div className="mb-10">
-            <div className="flex items-center gap-2 mb-4">
-              <h2 className="text-sm font-semibold text-white">Community Projects</h2>
-              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">{filteredDb.length} new</span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              <AnimatePresence>
-                {filteredDb.map((p, i) => (
-                  <DbProjectCard key={p.id} project={p} index={i} />
-                ))}
-              </AnimatePresence>
-            </div>
-            <div className="mt-6 border-t border-white/[0.06]" />
+        {dbError ? (
+          <div className="mb-10 flex flex-col items-center justify-center py-16 rounded-2xl border border-rose-500/20 bg-rose-500/[0.03] text-center">
+            <p className="text-sm font-medium text-rose-400 mb-1">Couldn&apos;t load community projects</p>
+            <p className="text-xs text-gray-600 max-w-xs">{dbError}</p>
           </div>
-        )}
+        ) : (
+          <>
+            {filteredDb.length > 0 && (
+              <div className="mb-10">
+                <div className="flex items-center gap-2 mb-4">
+                  <h2 className="text-sm font-semibold text-white">Community Projects</h2>
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">{filteredDb.length} new</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <AnimatePresence>
+                    {filteredDb.map((p, i) => (
+                      <DbProjectCard key={p.id} project={p} index={i} />
+                    ))}
+                  </AnimatePresence>
+                </div>
+                <div className="mt-6 border-t border-white/[0.06]" />
+              </div>
+            )}
 
-        {/* Category filters */}
-        <div className="flex items-center gap-3 mb-8 overflow-x-auto pb-4 scrollbar-hide">
-          {CATEGORY_TABS.map((cat) => {
-            const Icon = cat.icon;
-            const isActive = category === cat.name;
-            return (
-              <button
-                key={cat.name}
-                onClick={() => setCategory(cat.name)}
-                className={`flex items-center gap-2 flex-shrink-0 text-sm font-medium px-4 py-2.5 rounded-xl border transition-all duration-300 ${
-                  isActive
-                    ? 'bg-[#0a0a1a] text-white border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.15)]'
-                    : 'bg-transparent text-gray-400 border-white/[0.08] hover:border-white/[0.15] hover:bg-white/[0.02]'
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${isActive ? cat.color : 'text-current opacity-70'}`} />
-                {cat.name}
-              </button>
-            );
-          })}
-        </div>
+            {/* Category filters */}
+            <div className="flex items-center gap-3 mb-8 overflow-x-auto pb-4 scrollbar-hide">
+              {CATEGORY_TABS.map((cat) => {
+                const Icon = cat.icon;
+                const isActive = category === cat.name;
+                return (
+                  <button
+                    key={cat.name}
+                    onClick={() => setCategory(cat.name)}
+                    className={`flex items-center gap-2 flex-shrink-0 text-sm font-medium px-4 py-2.5 rounded-xl border transition-all duration-300 ${
+                      isActive
+                        ? 'bg-[#0a0a1a] text-white border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.15)]'
+                        : 'bg-transparent text-gray-400 border-white/[0.08] hover:border-white/[0.15] hover:bg-white/[0.02]'
+                    }`}
+                  >
+                    <Icon className={`w-4 h-4 ${isActive ? cat.color : 'text-current opacity-70'}`} />
+                    {cat.name}
+                  </button>
+                );
+              })}
+            </div>
 
-        {/* Grid */}
-        <AnimatePresence mode="wait">
-          {filtered.length > 0 ? (
-            <motion.div
-              key={category + search}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
-            >
-              {filtered.map((p, i) => (
-                <ProjectCard key={p.id} project={p} index={i} />
-              ))}
-            </motion.div>
-          ) : (
-            <motion.div
-              key="empty"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-20"
-            >
-              <p className="text-gray-600 mb-2">No projects match your search.</p>
-              <button
-                onClick={() => { setSearch(''); setCategory('All'); }}
-                className="text-sm text-cyan-500 hover:text-cyan-400 transition-colors"
-              >
-                Clear filters
-              </button>
-            </motion.div>
-          )}
+            {/* Grid */}
+            <AnimatePresence mode="wait">
+              {filtered.length > 0 ? (
+                <motion.div
+                  key={category + search}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
+                >
+                  {filtered.map((p, i) => (
+                    <ProjectCard key={p.id} project={p} index={i} />
+                  ))}
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="empty"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-20"
+                >
+                  <p className="text-gray-600 mb-2">No projects match your search.</p>
+                  <button
+                    onClick={() => { setSearch(''); setCategory('All'); }}
+                    className="text-sm text-cyan-500 hover:text-cyan-400 transition-colors"
+                  >
+                    Clear filters
+                  </button>
+                </motion.div>
+              )}
         </AnimatePresence>
+          </>
+        )}
 
         {/* Bottom CTA */}
         <div className="mt-16 pt-8 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-4">

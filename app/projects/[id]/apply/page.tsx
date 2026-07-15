@@ -64,6 +64,8 @@ export default function ApplyPage() {
 
   const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [authedName, setAuthedName] = useState('');
   const [dbTitle, setDbTitle] = useState('');
   const [form, setForm] = useState<FormData>({
@@ -119,23 +121,32 @@ export default function ApplyPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { data: { user } } = await supabase.auth.getUser();
-    await supabase.from('applications').insert({
-      project_id: id,
-      applicant_user_id: user?.id ?? null,
-      name: form.name,
-      email: form.email,
-      role: form.role || null,
-      major: form.major || null,
-      tech_stack: form.techStack || null,
-      github: form.github || null,
-      linkedin: form.linkedin || null,
-      portfolio: form.portfolio || null,
-      prev_projects: form.prevProjects || null,
-      motivation: form.motivation || null,
-      status: 'pending',
-    });
-    setSubmitted(true);
+    setSubmitError(null);
+    setSubmitting(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { error } = await supabase.from('applications').insert({
+        project_id: id,
+        applicant_user_id: user?.id ?? null,
+        name: form.name,
+        email: form.email,
+        role: form.role || null,
+        major: form.major || null,
+        tech_stack: form.techStack || null,
+        github: form.github || null,
+        linkedin: form.linkedin || null,
+        portfolio: form.portfolio || null,
+        prev_projects: form.prevProjects || null,
+        motivation: form.motivation || null,
+        status: 'pending',
+      });
+      if (error) throw error;
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -171,7 +182,7 @@ export default function ApplyPage() {
               Back to project
             </button>
             <button
-              onClick={() => router.push('/#discover-projects')}
+              onClick={() => router.push('/landing#discover-projects')}
               className={`px-6 py-2.5 rounded-xl font-semibold text-white text-sm bg-gradient-to-r ${accent.btnBg} ${accent.btnShadow} hover:opacity-90 transition-all`}
             >
               Explore more projects
@@ -323,7 +334,7 @@ export default function ApplyPage() {
                       onChange={set('role')}
                       className={`${inputCls(accent.ring)} appearance-none`}
                     >
-                      <option value="">I'm open to any role</option>
+                      <option value="">I&apos;m open to any role</option>
                       {(project?.openRoles ?? []).map((r) => (
                         <option key={r.title} value={r.title}>{r.title}</option>
                       ))}
@@ -498,14 +509,18 @@ export default function ApplyPage() {
             ) : (
               <button
                 type="submit"
-                disabled={!form.name.trim() || !form.email.includes('@')}
+                disabled={submitting || !form.name.trim() || !form.email.includes('@')}
                 className={`flex items-center gap-2 px-7 py-2.5 rounded-xl font-semibold text-sm text-white bg-gradient-to-r ${accent.btnBg} ${accent.btnShadow} hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed`}
               >
                 <Send className="w-4 h-4" />
-                Submit application
+                {submitting ? 'Submitting...' : 'Submit application'}
               </button>
             )}
           </div>
+
+          {submitError && (
+            <p className="text-center text-sm text-rose-400 mt-4">{submitError}</p>
+          )}
         </form>
 
         {/* Footer note */}

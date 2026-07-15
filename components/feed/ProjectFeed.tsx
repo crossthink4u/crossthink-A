@@ -281,26 +281,42 @@ export default function ProjectFeed() {
   const [user, setUser] = useState<User | null>(null);
   const [myProjects, setMyProjects] = useState<DbProject[]>([]);
   const [projectsLoading, setProjectsLoading] = useState(true);
+  const [projectsError, setProjectsError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const loadMyProjects = async (uid: string) => {
-    const { data } = await supabase
-      .from('projects')
-      .select('*')
-      .eq('owner_id', uid)
-      .order('created_at', { ascending: false });
-    setMyProjects((data as DbProject[]) ?? []);
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('owner_id', uid)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        setProjectsError(error.message);
+      } else {
+        setProjectsError(null);
+        setMyProjects((data as DbProject[]) ?? []);
+      }
+    } catch (err) {
+      setProjectsError(err instanceof Error ? err.message : 'Failed to load projects.');
+    }
     setProjectsLoading(false);
   };
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
-      if (user) loadMyProjects(user.id);
-      else setProjectsLoading(false);
-    });
+    supabase.auth.getUser()
+      .then(({ data: { user } }) => {
+        setUser(user);
+        if (user) loadMyProjects(user.id);
+        else setProjectsLoading(false);
+      })
+      .catch((err: Error) => {
+        setProjectsError(err.message);
+        setProjectsLoading(false);
+      });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
       setUser(session?.user ?? null);
@@ -395,7 +411,7 @@ export default function ProjectFeed() {
           <div className="flex items-center justify-between mb-5">
             <div>
               <h2 className="text-xl font-display font-bold text-white">Hey {firstName} — Your Projects</h2>
-              <p className="text-xs text-gray-500 mt-0.5">Projects you've posted on CrossThink</p>
+              <p className="text-xs text-gray-500 mt-0.5">Projects you&apos;ve posted on CrossThink</p>
             </div>
             <button onClick={() => setCreateOpen(true)}
               className="flex items-center gap-1.5 text-xs font-semibold text-white border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] px-3 py-2 rounded-lg transition-all">
@@ -406,6 +422,11 @@ export default function ProjectFeed() {
           {projectsLoading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-6 h-6 text-cyan-400 animate-spin" />
+            </div>
+          ) : projectsError ? (
+            <div className="flex flex-col items-center justify-center py-14 rounded-2xl border border-rose-500/20 bg-rose-500/[0.03] text-center">
+              <p className="text-sm font-medium text-rose-400 mb-1">Couldn&apos;t load your projects</p>
+              <p className="text-xs text-gray-600 max-w-xs">{projectsError}</p>
             </div>
           ) : myProjects.length === 0 ? (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
@@ -431,36 +452,45 @@ export default function ProjectFeed() {
 
         {/* ── DISCOVER ───────────────────────────────────────────────── */}
         <section>
-          <div className="flex items-center justify-between mb-5">
-            <div>
-              <h2 className="text-xl font-display font-bold text-white flex items-center gap-2">
-                Discover Projects <Sparkles className="w-4 h-4 text-cyan-400" />
-              </h2>
-              <p className="text-xs text-gray-500 mt-0.5">
-                {publicProjects.reduce((a, p) => a + p.openRoles.reduce((s, r) => s + r.count, 0), 0)} open roles across {publicProjects.length} projects
-              </p>
+          {projectsError ? (
+            <div className="flex flex-col items-center justify-center py-16 rounded-2xl border border-rose-500/20 bg-rose-500/[0.03] text-center">
+              <p className="text-sm font-medium text-rose-400 mb-1">Couldn&apos;t load projects</p>
+              <p className="text-xs text-gray-600 max-w-xs">{projectsError}</p>
             </div>
-          </div>
-
-          {/* Mobile search */}
-          <div className="sm:hidden mb-4 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search projects, tech..."
-              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-8 pr-3 py-2 text-sm text-white placeholder-gray-600 outline-none focus:border-white/[0.16] transition-colors" />
-          </div>
-
-          {filteredPublic.length > 0 ? (
-            <motion.div key={search} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              <AnimatePresence>
-                {filteredPublic.map((p, i) => <DiscoverCard key={p.id} project={p} index={i} />)}
-              </AnimatePresence>
-            </motion.div>
           ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-600 text-sm mb-2">No projects match your search.</p>
-              <button onClick={() => setSearch('')} className="text-sm text-cyan-500 hover:text-cyan-400 transition-colors">Clear search</button>
-            </div>
+            <>
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <h2 className="text-xl font-display font-bold text-white flex items-center gap-2">
+                    Discover Projects <Sparkles className="w-4 h-4 text-cyan-400" />
+                  </h2>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {publicProjects.reduce((a, p) => a + p.openRoles.reduce((s, r) => s + r.count, 0), 0)} open roles across {publicProjects.length} projects
+                  </p>
+                </div>
+              </div>
+
+              {/* Mobile search */}
+              <div className="sm:hidden mb-4 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600" />
+                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search projects, tech..."
+                  className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-8 pr-3 py-2 text-sm text-white placeholder-gray-600 outline-none focus:border-white/[0.16] transition-colors" />
+              </div>
+
+              {filteredPublic.length > 0 ? (
+                <motion.div key={search} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <AnimatePresence>
+                    {filteredPublic.map((p, i) => <DiscoverCard key={p.id} project={p} index={i} />)}
+                  </AnimatePresence>
+                </motion.div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-gray-600 text-sm mb-2">No projects match your search.</p>
+                  <button onClick={() => setSearch('')} className="text-sm text-cyan-500 hover:text-cyan-400 transition-colors">Clear search</button>
+                </div>
+              )}
+            </>
           )}
         </section>
       </div>

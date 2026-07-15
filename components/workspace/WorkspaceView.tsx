@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  DragDropContext, Droppable, Draggable,
+  DragDropContext, Droppable, Draggable, type DropResult,
 } from '@hello-pangea/dnd';
 import {
   ArrowLeft, Hexagon, Users, Code2, ChevronDown, ChevronUp,
@@ -18,6 +18,14 @@ import GlassCard from '@/components/ui/GlassCard';
 import Button from '@/components/ui/Button';
 import { useDashboard } from '@/context/DashboardContext';
 import type { User } from '@supabase/supabase-js';
+
+type WorkspaceTask = {
+  id: string;
+  content: string;
+  priority: string;
+  comments: number;
+  attachments: number;
+};
 import type { DbProject, DbApplication, DbProjectMember } from '@/types/database';
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
@@ -174,7 +182,7 @@ function ApplicationCard({
               {!app.applicant_user_id && app.status === 'approved' && (
                 <div className="flex items-start gap-2 p-2.5 rounded-lg bg-amber-500/[0.06] border border-amber-500/15">
                   <ShieldAlert className="w-3.5 h-3.5 text-amber-400 flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-amber-400">Applicant applied without an account. They'll get member access once they register with <strong>{app.email}</strong>.</p>
+                  <p className="text-xs text-amber-400">Applicant applied without an account. They&apos;ll get member access once they register with <strong>{app.email}</strong>.</p>
                 </div>
               )}
             </div>
@@ -335,7 +343,7 @@ export default function WorkspaceView({ projectId }: { projectId: string }) {
     setActionLoading(null);
   };
 
-  const onDragEnd = (result: any) => {
+  const onDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
     if (!destination) return;
     if (destination.droppableId === source.droppableId && destination.index === source.index) return;
@@ -520,7 +528,7 @@ export default function WorkspaceView({ projectId }: { projectId: string }) {
                             {...provided.droppableProps}
                             className={`flex-1 transition-colors rounded-xl min-h-[150px] ${snapshot.isDraggingOver ? 'bg-blue-900/10' : ''}`}
                           >
-                            {tasks.map((task: any, index: number) => (
+                            {tasks.map((task: WorkspaceTask, index: number) => (
                               <Draggable key={task.id} draggableId={task.id} index={index}>
                                 {(dragProvided, dragSnapshot) => (
                                   <div

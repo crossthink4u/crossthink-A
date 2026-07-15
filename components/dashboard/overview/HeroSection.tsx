@@ -9,14 +9,14 @@ export default function HeroSection() {
   const router = useRouter();
   const { user, enhancedProjects, overviewTasks, calendarEvents, productivity } = useDashboard();
 
-  const activeTasks = overviewTasks.filter((t: any) => t.status !== 'done').length;
+  const activeTasks = overviewTasks.filter((t: { status: string }) => t.status !== 'done').length;
   const focusProject = enhancedProjects[0];
 
   const now = new Date();
   const nearest = calendarEvents
-    .map((e: any) => ({ ...e, dt: new Date(e.date) }))
-    .filter((e: any) => e.dt > now)
-    .sort((a: any, b: any) => a.dt - b.dt)[0];
+    .map((e: { title: string; date: string }) => ({ ...e, dt: new Date(e.date) }))
+    .filter((e) => e.dt > now)
+    .sort((a, b) => a.dt.getTime() - b.dt.getTime())[0];
 
   const hour = now.getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';

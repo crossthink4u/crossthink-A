@@ -65,6 +65,16 @@ const RegisterForm = () => {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
+  const [oauthError, setOauthError] = useState<string | null>(null);
+
+  const handleOAuth = async (provider: 'google' | 'github') => {
+    setOauthError(null);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+    if (error) setOauthError(error.message);
+  };
 
   const [form, setForm] = useState<FormData>({
     email: '',
@@ -161,7 +171,7 @@ const RegisterForm = () => {
           >
             <Check className="w-8 h-8 text-emerald-400" />
           </motion.div>
-          <h2 className="font-display text-2xl font-bold text-white mb-2">You're in!</h2>
+          <h2 className="font-display text-2xl font-bold text-white mb-2">You&apos;re in!</h2>
           <p className="text-gray-500 text-sm">Redirecting to your workspace…</p>
         </motion.div>
       </div>
@@ -249,15 +259,23 @@ const RegisterForm = () => {
                   className="space-y-4"
                 >
                   {/* OAuth */}
+                  {oauthError && (
+                    <div className="mb-3 p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-start gap-2">
+                      <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                      <p>{oauthError}</p>
+                    </div>
+                  )}
                   <div className="grid grid-cols-2 gap-2 mb-5">
                     <button
                       type="button"
+                      onClick={() => handleOAuth('google')}
                       className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-gray-300 text-xs font-medium hover:bg-white/[0.07] hover:border-white/[0.14] transition-all"
                     >
                       <Globe className="w-3.5 h-3.5" /> Google
                     </button>
                     <button
                       type="button"
+                      onClick={() => handleOAuth('github')}
                       className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-gray-300 text-xs font-medium hover:bg-white/[0.07] hover:border-white/[0.14] transition-all"
                     >
                       <Github className="w-3.5 h-3.5" /> GitHub

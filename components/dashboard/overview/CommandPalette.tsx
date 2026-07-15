@@ -42,16 +42,16 @@ export default function CommandPalette({ isOpen, onClose }: { isOpen: boolean; o
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (q.length < 2) return [];
-    const out: any[] = [];
-    projects.forEach((p: any) => {
+    const out: { type: string; icon: typeof FolderKanban; title: string; sub: string; path: string }[] = [];
+    projects.forEach((p: { title: string; dept: string; tech?: string[] }) => {
       if (`${p.title} ${p.dept} ${(p.tech || []).join(' ')}`.toLowerCase().includes(q))
         out.push({ type: 'project', icon: FolderKanban, title: p.title, sub: p.dept, path: '/dashboard/projects' });
     });
-    teams.forEach((t: any) => {
+    teams.forEach((t: { name: string; roles?: string[]; status: string }) => {
       if (`${t.name} ${(t.roles || []).join(' ')}`.toLowerCase().includes(q))
         out.push({ type: 'team', icon: Users, title: t.name, sub: t.status, path: '/dashboard/teams' });
     });
-    mentors.forEach((m: any) => {
+    mentors.forEach((m: { name: string; field: string }) => {
       if (`${m.name} ${m.field}`.toLowerCase().includes(q))
         out.push({ type: 'mentor', icon: GraduationCap, title: m.name, sub: m.field, path: '/dashboard/mentors' });
     });
@@ -91,7 +91,7 @@ export default function CommandPalette({ isOpen, onClose }: { isOpen: boolean; o
                 {results.length > 0 && (
                   <div className="p-2">
                     <p className="text-[10px] text-gray-600 px-2 py-1 uppercase tracking-wider">Results</p>
-                    {results.map((r: any, i: number) => (
+                    {results.map((r, i) => (
                       <button key={i} onClick={() => go(r.path)} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/[0.05] text-left transition-colors">
                         <r.icon className="w-4 h-4 text-gray-500" />
                         <div className="flex-1 min-w-0">

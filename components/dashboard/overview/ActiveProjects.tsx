@@ -34,7 +34,7 @@ export default function ActiveProjects() {
       </div>
 
       <div className="grid gap-3">
-        {enhancedProjects.map((p: any, i: number) => (
+        {enhancedProjects.map((p, i) => (
           <motion.div
             key={p.id}
             initial={{ opacity: 0, x: -10 }}

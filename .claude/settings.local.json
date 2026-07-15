@@ -8,7 +8,11 @@
       "Bash(Out-Null)",
       "Bash(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\divya\\\\Desktop\\\\Coding\\\\crossthink-A\\\\app\\\\projects\\\\[id]\\\\apply\")",
       "Bash(Write-Host \"done\")",
-      "PowerShell(New-Item *)"
+      "PowerShell(New-Item *)",
+      "Bash(curl *)",
+      "Bash(nslookup qdxglabmrentmhrdrjqf.supabase.co)",
+      "Bash(nslookup supabase.co)",
+      "Bash(nslookup google.com)"
     ]
   }
 }

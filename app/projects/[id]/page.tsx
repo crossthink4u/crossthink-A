@@ -67,19 +67,40 @@ export default function ProjectDetailPage() {
   const supabase = createClient();
   const [project, setProject] = useState<Project | null>(getProjectById(id) ?? null);
   const [loading, setLoading] = useState(!getProjectById(id));
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
     if (project) return;
-    supabase.from('projects').select('*').eq('id', id).single().then(({ data }) => {
-      if (data) setProject(normalize(data as DbProject));
-      setLoading(false);
-    });
+    supabase.from('projects').select('*').eq('id', id).single()
+      .then(
+        ({ data, error }) => {
+          if (error) setFetchError(error.message);
+          else if (data) setProject(normalize(data as DbProject));
+          setLoading(false);
+        },
+        (err: Error) => {
+          setFetchError(err.message);
+          setLoading(false);
+        }
+      );
   }, [id]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-[#050505] text-white flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center gap-3 px-4 text-center">
+        <p className="text-rose-400 text-lg font-medium">Couldn&apos;t load this project</p>
+        <p className="text-gray-500 text-sm max-w-sm">{fetchError}</p>
+        <button onClick={() => router.push('/')} className="mt-4 px-5 py-2.5 rounded-xl bg-white/[0.06] border border-white/10 text-sm text-gray-300 hover:text-white transition-colors">
+          Back home
+        </button>
       </div>
     );
   }

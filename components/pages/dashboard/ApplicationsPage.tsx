@@ -30,7 +30,7 @@ const ApplicationsPage = () => {
     <div className="space-y-6 pb-20">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">My Applications</h1>
-        <p className="text-gray-500 dark:text-gray-400">Track the status of projects you've applied to.</p>
+        <p className="text-gray-500 dark:text-gray-400">Track the status of projects you&apos;ve applied to.</p>
       </div>
 
       <GlassCard className="overflow-hidden">

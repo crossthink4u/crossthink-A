@@ -34,15 +34,15 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
     const q = searchQuery.trim().toLowerCase();
     if (q.length < 2) return [];
     const out: { type: string; title: string; sub: string; path: string }[] = [];
-    projects.forEach((p: any) => {
+    projects.forEach((p: { title: string; dept: string; tech?: string[] }) => {
       if (`${p.title} ${p.dept} ${(p.tech || []).join(' ')}`.toLowerCase().includes(q))
         out.push({ type: 'project', title: p.title, sub: p.dept, path: '/dashboard/projects' });
     });
-    teams.forEach((t: any) => {
+    teams.forEach((t: { name: string; roles?: string[]; status: string }) => {
       if (`${t.name} ${(t.roles || []).join(' ')}`.toLowerCase().includes(q))
         out.push({ type: 'team', title: t.name, sub: t.status, path: '/dashboard/teams' });
     });
-    mentors.forEach((m: any) => {
+    mentors.forEach((m: { name: string; field: string }) => {
       if (`${m.name} ${m.field}`.toLowerCase().includes(q))
         out.push({ type: 'mentor', title: m.name, sub: m.field, path: '/dashboard/mentors' });
     });

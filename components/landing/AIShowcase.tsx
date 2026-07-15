@@ -97,7 +97,7 @@ const AIShowcase = () => (
 
           <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.1 }}
             className="text-3xl md:text-5xl font-display font-bold mb-6 text-white tracking-tight">
-            Don't search for talent.<br />
+            Don&apos;t search for talent.<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500">Let it find you.</span>
           </motion.h2>
 

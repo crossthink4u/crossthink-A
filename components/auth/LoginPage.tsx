@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Hexagon, Eye, EyeOff, Mail, User, Lock, ArrowRight, GitBranch, Globe, AlertCircle } from 'lucide-react';
+import { Hexagon, Eye, EyeOff, Mail, Lock, ArrowRight, GitBranch, Globe, AlertCircle } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import ParticleField from '@/components/landing/ParticleField';
@@ -11,12 +11,12 @@ const LoginPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
-  const [loginMode, setLoginMode] = useState('email');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [form, setForm] = useState({ identifier: '', password: '' });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +37,31 @@ const LoginPage = () => {
 
     const redirectTo = searchParams.get('redirectTo') || '/feed';
     router.push(redirectTo);
+  };
+
+  const handleForgotPassword = async () => {
+    setError(null);
+    if (!form.identifier.includes('@')) {
+      setError('Enter your email address above first.');
+      return;
+    }
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(form.identifier, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (resetError) {
+      setError(resetError.message);
+      return;
+    }
+    setResetSent(true);
+  };
+
+  const handleOAuth = async (provider: 'google' | 'github') => {
+    setError(null);
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+    if (oauthError) setError(oauthError.message);
   };
 
   return (
@@ -83,32 +108,23 @@ const LoginPage = () => {
             </div>
           )}
 
-          {/* Login mode toggle */}
-          <div className="flex gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] mb-6">
-            {[
-              { id: 'email', label: 'Email', icon: Mail },
-              { id: 'username', label: 'Username', icon: User },
-            ].map((mode) => (
-              <button key={mode.id} onClick={() => setLoginMode(mode.id)}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-medium transition-all duration-300 ${loginMode === mode.id ? 'bg-white/[0.08] text-white' : 'text-gray-500 hover:text-gray-300'}`}>
-                <mode.icon className="w-3.5 h-3.5" /> {mode.label}
-              </button>
-            ))}
-          </div>
+          {resetSent && (
+            <div className="mb-6 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm">
+              Password reset email sent. Check your inbox for a link.
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Identifier field */}
             <div>
-              <label className="block text-xs font-medium text-gray-400 mb-2">
-                {loginMode === 'email' ? 'Email Address' : 'Username'}
-              </label>
+              <label className="block text-xs font-medium text-gray-400 mb-2">Email Address</label>
               <div className="relative">
                 <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
-                  {loginMode === 'email' ? <Mail className="w-4 h-4" /> : <User className="w-4 h-4" />}
+                  <Mail className="w-4 h-4" />
                 </div>
                 <input
-                  type={loginMode === 'email' ? 'email' : 'text'}
-                  placeholder={loginMode === 'email' ? 'you@university.edu' : 'your_username'}
+                  type="email"
+                  placeholder="you@university.edu"
                   value={form.identifier}
                   onChange={(e) => setForm({ ...form, identifier: e.target.value })}
                   className="w-full bg-white/[0.04] border border-white/[0.10] rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500/40 transition-all"
@@ -120,7 +136,7 @@ const LoginPage = () => {
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="text-xs font-medium text-gray-400">Password</label>
-                <button type="button" className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors">Forgot Password?</button>
+                <button type="button" onClick={handleForgotPassword} className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors">Forgot Password?</button>
               </div>
               <div className="relative">
                 <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
@@ -164,17 +180,17 @@ const LoginPage = () => {
 
           {/* OAuth */}
           <div className="grid grid-cols-2 gap-3">
-            <button className="flex items-center justify-center gap-2 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-gray-300 text-sm font-medium hover:bg-white/[0.06] hover:border-white/[0.1] transition-all">
+            <button type="button" onClick={() => handleOAuth('google')} className="flex items-center justify-center gap-2 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-gray-300 text-sm font-medium hover:bg-white/[0.06] hover:border-white/[0.1] transition-all">
               <Globe className="w-4 h-4" /> Google
             </button>
-            <button className="flex items-center justify-center gap-2 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-gray-300 text-sm font-medium hover:bg-white/[0.06] hover:border-white/[0.1] transition-all">
+            <button type="button" onClick={() => handleOAuth('github')} className="flex items-center justify-center gap-2 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-gray-300 text-sm font-medium hover:bg-white/[0.06] hover:border-white/[0.1] transition-all">
               <GitBranch className="w-4 h-4" /> GitHub
             </button>
           </div>
 
           {/* Register link */}
           <p className="text-center text-sm text-gray-500 mt-8">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <button onClick={() => router.push('/register')} className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors">Create one</button>
           </p>
         </motion.div>
