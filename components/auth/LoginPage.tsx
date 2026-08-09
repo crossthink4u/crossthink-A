@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Hexagon, Eye, EyeOff, Mail, Lock, ArrowRight, GitBranch, Globe, AlertCircle } from 'lucide-react';
+import { Hexagon, Eye, EyeOff, Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import ParticleField from '@/components/landing/ParticleField';
@@ -16,7 +16,15 @@ const LoginPage = () => {
   const [form, setForm] = useState({ identifier: '', password: '' });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+
+  React.useEffect(() => {
+    const callbackError = searchParams.get('error');
+    if (callbackError === 'auth-callback-failed') {
+      setError('Google sign-in could not be completed. Please try again.');
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,13 +63,21 @@ const LoginPage = () => {
     setResetSent(true);
   };
 
-  const handleOAuth = async (provider: 'google' | 'github') => {
+  const handleGoogleSignIn = async () => {
     setError(null);
+    setGoogleLoading(true);
+    const redirectTo = searchParams.get('redirectTo');
+    const callbackUrl = new URL('/auth/callback', window.location.origin);
+    if (redirectTo?.startsWith('/')) callbackUrl.searchParams.set('next', redirectTo);
+
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      provider: 'google',
+      options: { redirectTo: callbackUrl.toString() },
     });
-    if (oauthError) setError(oauthError.message);
+    if (oauthError) {
+      setGoogleLoading(false);
+      setError(oauthError.message);
+    }
   };
 
   return (
@@ -180,11 +196,8 @@ const LoginPage = () => {
 
           {/* OAuth */}
           <div className="grid grid-cols-2 gap-3">
-            <button type="button" onClick={() => handleOAuth('google')} className="flex items-center justify-center gap-2 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-gray-300 text-sm font-medium hover:bg-white/[0.06] hover:border-white/[0.1] transition-all">
-              <Globe className="w-4 h-4" /> Google
-            </button>
-            <button type="button" onClick={() => handleOAuth('github')} className="flex items-center justify-center gap-2 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-gray-300 text-sm font-medium hover:bg-white/[0.06] hover:border-white/[0.1] transition-all">
-              <GitBranch className="w-4 h-4" /> GitHub
+            <button type="button" disabled={googleLoading} onClick={handleGoogleSignIn} className="col-span-2 flex items-center justify-center gap-2 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-gray-300 text-sm font-medium hover:bg-white/[0.06] hover:border-white/[0.1] transition-all disabled:opacity-50">
+              <span className="font-bold text-base leading-none">G</span> {googleLoading ? 'Connecting to Google...' : 'Continue with Google'}
             </button>
           </div>
 

@@ -13,8 +13,6 @@ import {
   User,
   Check,
   AlertCircle,
-  Github,
-  Globe,
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
@@ -66,14 +64,19 @@ const RegisterForm = () => {
   const [done, setDone] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [oauthError, setOauthError] = useState<string | null>(null);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
-  const handleOAuth = async (provider: 'google' | 'github') => {
+  const handleGoogleSignIn = async () => {
     setOauthError(null);
+    setGoogleLoading(true);
     const { error } = await supabase.auth.signInWithOAuth({
-      provider,
+      provider: 'google',
       options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
-    if (error) setOauthError(error.message);
+    if (error) {
+      setGoogleLoading(false);
+      setOauthError(error.message);
+    }
   };
 
   const [form, setForm] = useState<FormData>({
@@ -265,20 +268,14 @@ const RegisterForm = () => {
                       <p>{oauthError}</p>
                     </div>
                   )}
-                  <div className="grid grid-cols-2 gap-2 mb-5">
+                  <div className="mb-5">
                     <button
                       type="button"
-                      onClick={() => handleOAuth('google')}
-                      className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-gray-300 text-xs font-medium hover:bg-white/[0.07] hover:border-white/[0.14] transition-all"
+                      disabled={googleLoading}
+                      onClick={handleGoogleSignIn}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-gray-300 text-xs font-medium hover:bg-white/[0.07] hover:border-white/[0.14] transition-all disabled:opacity-50"
                     >
-                      <Globe className="w-3.5 h-3.5" /> Google
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleOAuth('github')}
-                      className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-gray-300 text-xs font-medium hover:bg-white/[0.07] hover:border-white/[0.14] transition-all"
-                    >
-                      <Github className="w-3.5 h-3.5" /> GitHub
+                      <span className="font-bold text-sm leading-none">G</span> {googleLoading ? 'Connecting to Google...' : 'Continue with Google'}
                     </button>
                   </div>
 
