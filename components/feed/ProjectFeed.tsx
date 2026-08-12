@@ -9,7 +9,7 @@ import {
   Loader2, Upload,
 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
-import { publicProjects, type Project } from '@/data/projects';
+import { type Project } from '@/data/projects';
 import type { User } from '@supabase/supabase-js';
 import type { DbProject } from '@/types/database';
 
@@ -21,11 +21,10 @@ const ACCENT_COLORS: Record<string, string> = {
 };
 
 // ─── Discover card ───────────────────────────────────────────────────────────
-
-function DiscoverCard({ project, index }: { project: Project; index: number }) {
+function DiscoverCard({ project, index }: { project: DbProject; index: number }) {
   const router = useRouter();
-  const openCount = project.openRoles.reduce((s, r) => s + r.count, 0);
-  const accentHex = ACCENT_COLORS[project.accentColor] ?? '#00f0ff';
+  const openCount = project.open_roles.reduce((s, r) => s + r.count, 0);
+  const accentHex = '#00f0ff';
 
   return (
     <motion.div
@@ -37,7 +36,9 @@ function DiscoverCard({ project, index }: { project: Project; index: number }) {
       className="group flex flex-col rounded-xl bg-[#0d0d0d] border border-white/[0.07] hover:border-white/[0.14] transition-all duration-200 overflow-hidden cursor-pointer hover:bg-[#111]"
     >
       <div className="relative h-36 w-full overflow-hidden bg-[#0a0a0a] flex-shrink-0">
-        <img src={project.image} alt={project.title}
+        <img
+          src={project.image_url || '/placeholder-project.jpg'}
+          alt={project.title}
           className="w-full h-full object-cover opacity-70 group-hover:opacity-85 group-hover:scale-105 transition-all duration-500" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d0d] via-[#0d0d0d]/10 to-transparent" />
         <div className="absolute top-2.5 right-2.5 flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-md bg-black/60 backdrop-blur-sm"
@@ -59,7 +60,7 @@ function DiscoverCard({ project, index }: { project: Project; index: number }) {
           )}
         </div>
         <div className="flex items-center gap-3 text-[11px] text-gray-600">
-          <span className="flex items-center gap-1"><Users className="w-3 h-3" />{project.teamSize.filled}/{project.teamSize.capacity}</span>
+          {project.open_roles.reduce((sum, role) => sum + role.count, 0)}/{project.team_size_capacity}
           <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{project.duration}</span>
         </div>
         <button
@@ -282,6 +283,7 @@ export default function ProjectFeed() {
   const [myProjects, setMyProjects] = useState<DbProject[]>([]);
   const [projectsLoading, setProjectsLoading] = useState(true);
   const [projectsError, setProjectsError] = useState<string | null>(null);
+  const [publicProjects, setPublicProjects] = useState<DbProject[]>([]);
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -306,13 +308,40 @@ export default function ProjectFeed() {
     setProjectsLoading(false);
   };
 
+  const loadPublicProjects = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('is_public', true)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      setProjectsError(error.message);
+      return;
+    }
+
+    setPublicProjects((data as DbProject[]) ?? []);
+  } catch (err) {
+    setProjectsError(
+      err instanceof Error ? err.message : 'Failed to load public projects.'
+    );
+  }
+};
+
   useEffect(() => {
-    supabase.auth.getUser()
-      .then(({ data: { user } }) => {
-        setUser(user);
-        if (user) loadMyProjects(user.id);
-        else setProjectsLoading(false);
-      })
+  loadPublicProjects();
+
+  supabase.auth.getUser()
+    .then(({ data: { user } }) => {
+      setUser(user);
+
+      if (user) {
+        loadMyProjects(user.id);
+      } else {
+        setProjectsLoading(false);
+      }
+    })
       .catch((err: Error) => {
         setProjectsError(err.message);
         setProjectsLoading(false);
@@ -335,12 +364,18 @@ export default function ProjectFeed() {
     router.push('/');
   };
 
-  const filteredPublic = publicProjects.filter((p) => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return p.title.toLowerCase().includes(q) || p.dept.toLowerCase().includes(q) || p.tech.some((t) => t.toLowerCase().includes(q));
-  });
 
+const filteredPublic = publicProjects.filter((p) => {
+  if (!search) return true;
+
+  const q = search.toLowerCase();
+
+  return (
+    p.title.toLowerCase().includes(q) ||
+    (p.dept ?? '').toLowerCase().includes(q) ||
+    p.tech.some((t) => t.toLowerCase().includes(q))
+  );
+});
   const firstName = user?.user_metadata?.full_name?.split(' ')[0] || 'there';
 
   return (
@@ -465,7 +500,11 @@ export default function ProjectFeed() {
                     Discover Projects <Sparkles className="w-4 h-4 text-cyan-400" />
                   </h2>
                   <p className="text-xs text-gray-500 mt-0.5">
-                    {publicProjects.reduce((a, p) => a + p.openRoles.reduce((s, r) => s + r.count, 0), 0)} open roles across {publicProjects.length} projects
+
+                    {filteredPublic.reduce(
+                      (a, p) => a + p.open_roles.reduce((s, r) => s + r.count, 0),
+                      0
+                    )} open roles across {filteredPublic.length} project
                   </p>
                 </div>
               </div>

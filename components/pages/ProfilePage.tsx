@@ -136,21 +136,7 @@ const ProfilePage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-5">
-            {/* Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[
-                { label: 'Collaboration Score', value: '—', color: 'text-cyan-400' },
-                { label: 'Active Projects', value: 0, color: 'text-purple-400' },
-                { label: 'Teams Joined', value: 0, color: 'text-green-400' },
-                { label: isStudent ? 'Mentor Sessions' : 'Students Mentored', value: 0, color: 'text-amber-400' },
-              ].map((stat, i) => (
-                <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
-                  className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] text-center">
-                  <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
-                  <p className="text-[10px] text-gray-500 mt-1">{stat.label}</p>
-                </motion.div>
-              ))}
-            </div>
+            
 
             {/* Skills / Expertise */}
             {skills.length > 0 && (

@@ -25,7 +25,7 @@ import {
   LogOut,
   Rss,
 } from 'lucide-react';
-import { publicProjects, type Project } from '@/data/projects';
+import type { Project } from '@/data/projects';
 import { createClient } from '@/utils/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import type { DbProject } from '@/types/database';
@@ -230,6 +230,7 @@ export default function ProjectsPage() {
       .from('projects')
       .select('*')
       .eq('is_public', true)
+      .ilike('title', '%iris%')
       .order('created_at', { ascending: false })
       .then(
         ({ data, error }) => {
@@ -260,18 +261,7 @@ export default function ProjectsPage() {
     setDropdownOpen(false);
   };
 
-  const filtered = publicProjects.filter((p) => {
-    const matchCat = category === 'All' || p.category === category;
-    const q = search.toLowerCase();
-    const matchSearch =
-      !q ||
-      p.title.toLowerCase().includes(q) ||
-      p.tech.some((t) => t.toLowerCase().includes(q)) ||
-      p.dept.toLowerCase().includes(q) ||
-      p.category.toLowerCase().includes(q);
-    return matchCat && matchSearch;
-  });
-
+  const filtered: Project[] = [];
   const filteredDb = dbProjects.filter((p) => {
     if (!search) return true;
     const q = search.toLowerCase();
@@ -283,8 +273,7 @@ export default function ProjectsPage() {
   });
 
   const dbOpen = dbProjects.reduce((a, p) => a + (p.open_roles ?? []).reduce((s: number, r: { count: number }) => s + r.count, 0), 0);
-  const totalOpen = publicProjects.reduce((a, p) => a + p.openRoles.reduce((s, r) => s + r.count, 0), 0) + dbOpen;
-
+  const totalOpen = dbOpen;
   return (
     <div className="min-h-screen bg-[#080808] text-white antialiased selection:bg-cyan-500/20">
 
@@ -512,37 +501,8 @@ export default function ProjectsPage() {
             </div>
 
             {/* Grid */}
-            <AnimatePresence mode="wait">
-              {filtered.length > 0 ? (
-                <motion.div
-                  key={category + search}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.15 }}
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
-                >
-                  {filtered.map((p, i) => (
-                    <ProjectCard key={p.id} project={p} index={i} />
-                  ))}
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="empty"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-center py-20"
-                >
-                  <p className="text-gray-600 mb-2">No projects match your search.</p>
-                  <button
-                    onClick={() => { setSearch(''); setCategory('All'); }}
-                    className="text-sm text-cyan-500 hover:text-cyan-400 transition-colors"
-                  >
-                    Clear filters
-                  </button>
-                </motion.div>
-              )}
-        </AnimatePresence>
+            
+       
           </>
         )}
 

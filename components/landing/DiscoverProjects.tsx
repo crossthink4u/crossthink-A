@@ -38,15 +38,21 @@ export default function DiscoverProjects() {
   const router = useRouter();
   const [activeCategory, setActiveCategory] = useState('All');
 
+  const irisProject = publicProjects.find(
+    (project) => project.title.toLowerCase().includes('iris')
+  );
+
+  const projects = irisProject ? [irisProject] : [];
+
   const filtered =
     activeCategory === 'All'
-      ? publicProjects
-      : publicProjects.filter((p) => p.category === activeCategory);
+    ? projects
+    : projects.filter((p) => p.category === activeCategory);
 
-  const totalOpen = publicProjects.reduce(
-    (acc, p) => acc + p.openRoles.reduce((s, r) => s + r.count, 0),
-    0
-  );
+  const totalOpen = projects.reduce(
+  (acc, p) => acc + p.openRoles.reduce((s, r) => s + r.count, 0),
+  0
+);
 
   return (
     <section
@@ -79,7 +85,7 @@ export default function DiscoverProjects() {
         >
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-cyan-500/20 bg-cyan-500/5 text-cyan-400 text-sm font-medium mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-            {totalOpen} open roles across {publicProjects.length} projects
+            {totalOpen} open roles across {projects.length} project
           </div>
           <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-5 tracking-tight">
             Discover{' '}
