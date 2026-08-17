@@ -2,48 +2,76 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Building, Calendar, GitBranch, Link2, Globe, Edit3, Star, TrendingUp, Users, FolderOpen, Award, ArrowRight, Activity, LogOut, Loader2 } from 'lucide-react';
+import {
+  Building, Calendar, GraduationCap, LogOut, Loader2, ArrowRight,
+  FolderOpen, Send, ExternalLink, Clock, CheckCircle2, XCircle,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import type { User } from '@supabase/supabase-js';
+import type { DbProject, DbApplication } from '@/types/database';
 
-const HeatmapGrid = () => {
-  const weeks = 20;
-  const days = 7;
-  const levels = [0, 1, 2, 3, 4];
-  const colors = ['bg-white/[0.03]', 'bg-purple-500/20', 'bg-purple-500/40', 'bg-purple-500/60', 'bg-purple-500/80'];
-  return (
-    <div className="flex gap-[3px]">
-      {Array.from({ length: weeks }).map((_, w) => (
-        <div key={w} className="flex flex-col gap-[3px]">
-          {Array.from({ length: days }).map((_, d) => {
-            const level = levels[Math.floor(Math.random() * levels.length)];
-            return <div key={d} className={`w-[10px] h-[10px] rounded-sm ${colors[level]}`} />;
-          })}
-        </div>
-      ))}
-    </div>
-  );
+const statusMeta: Record<string, { label: string; cls: string; icon: React.ElementType }> = {
+  pending:  { label: 'Pending',  cls: 'text-amber-400 border-amber-500/20 bg-amber-500/10',    icon: Clock },
+  approved: { label: 'Approved', cls: 'text-emerald-400 border-emerald-500/20 bg-emerald-500/10', icon: CheckCircle2 },
+  rejected: { label: 'Declined', cls: 'text-rose-400 border-rose-500/20 bg-rose-500/10',      icon: XCircle },
 };
+
+function Panel({ title, icon: Icon, count, children }: {
+  title: string;
+  icon: React.ElementType;
+  count?: number;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5">
+      <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+        <Icon className="w-4 h-4 text-purple-400" />
+        {title}
+        {typeof count === 'number' && count > 0 && (
+          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-white/[0.06] text-gray-400">{count}</span>
+        )}
+      </h2>
+      {children}
+    </section>
+  );
+}
+
+function Empty({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-xs text-gray-600 rounded-xl border border-dashed border-white/[0.08] px-4 py-6 text-center">
+      {children}
+    </p>
+  );
+}
 
 const ProfilePage = () => {
   const router = useRouter();
   const supabase = createClient();
   const [user, setUser] = useState<User | null>(null);
+  const [projects, setProjects] = useState<DbProject[]>([]);
+  const [applications, setApplications] = useState<DbApplication[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUser = async () => {
+    let cancelled = false;
+
+    (async () => {
       const { data: { user } } = await supabase.auth.getUser();
+      if (cancelled) return;
+
+      if (!user) { router.replace('/login?redirectTo=/profile'); return; }
       setUser(user);
       setLoading(false);
-    };
-    fetchUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-    return () => subscription.unsubscribe();
+      supabase.from('projects').select('*').eq('owner_id', user.id).order('created_at', { ascending: false })
+        .then(({ data }) => { if (!cancelled) setProjects((data as DbProject[]) ?? []); });
+
+      supabase.from('applications').select('*').eq('applicant_user_id', user.id).order('created_at', { ascending: false })
+        .then(({ data }) => { if (!cancelled) setApplications((data as DbApplication[]) ?? []); });
+    })();
+
+    return () => { cancelled = true; };
   }, []);
 
   const handleSignOut = async () => {
@@ -51,195 +79,150 @@ const ProfilePage = () => {
     router.push('/');
   };
 
-  if (loading) {
+  if (loading || !user) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
+        <Loader2 className="w-7 h-7 text-purple-400 animate-spin" />
       </div>
     );
   }
 
-  const meta = user?.user_metadata ?? {};
-  const fullName = meta.full_name || user?.email?.split('@')[0] || 'User';
-  const initials = fullName.charAt(0).toUpperCase();
-  const role: string = meta.role || 'student';
-  const isStudent = role === 'student';
+  const meta = user.user_metadata ?? {};
+  const fullName: string = meta.full_name || user.email?.split('@')[0] || 'User';
+  const isStudent = (meta.role || 'student') === 'student';
+  const expertise: string[] = Array.isArray(meta.expertise)
+    ? meta.expertise
+    : meta.expertise ? [meta.expertise] : [];
+  const skills = [isStudent ? meta.major : null, ...expertise].filter(Boolean) as string[];
 
-  // Student fields
-  const university = meta.university || '';
-  const major = meta.major || '';
-  const year = meta.year || '';
-
-  // Mentor fields
-  const organization = meta.organization || '';
-  const expertise: string[] = meta.expertise
-    ? (typeof meta.expertise === 'string' ? [meta.expertise] : meta.expertise)
-    : [];
-  const yearsExp = meta.years_exp || '';
-
-  const skills = isStudent
-    ? [major, ...(expertise.length ? expertise : [])].filter(Boolean)
-    : expertise;
-
-  const timeline = [
-    { action: 'Joined CrossThink', time: 'Recently', icon: Star, color: 'text-purple-400' },
-    { action: 'Profile created', time: 'Just now', icon: FolderOpen, color: 'text-purple-400' },
-  ];
+  const facts = isStudent
+    ? [
+        { icon: GraduationCap, value: meta.major },
+        { icon: Building, value: meta.university },
+        { icon: Calendar, value: meta.year },
+      ]
+    : [
+        { icon: Building, value: meta.organization },
+        { icon: Calendar, value: meta.years_exp ? `${meta.years_exp} yrs experience` : null },
+      ];
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white">
-      {/* Banner */}
-      <div className="relative h-48 bg-gradient-to-r from-purple-600/30 via-purple-600/30 to-violet-600/30 overflow-hidden">
-        <div className="absolute inset-0 bg-[#050505]/40" />
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_center,_rgba(168,85,247,0.1),transparent_70%)]" />
-        <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
-          <button onClick={() => router.push('/feed')} className="flex items-center gap-2 text-sm text-gray-300 hover:text-white transition-colors px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-md">
+    <div className="min-h-screen bg-[#050505] text-white antialiased">
+      <header className="sticky top-0 z-40 bg-[#050505]/85 backdrop-blur-xl border-b border-white/[0.06]">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+          <button onClick={() => router.push('/feed')} className="text-sm text-gray-400 hover:text-white transition-colors">
             ← Feed
           </button>
-          <button onClick={handleSignOut} className="flex items-center gap-2 text-sm text-rose-400 hover:text-rose-300 transition-colors px-4 py-1.5 rounded-full bg-black/30 backdrop-blur-md">
-            <LogOut className="w-3.5 h-3.5" /> Sign Out
+          <button onClick={handleSignOut}
+            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-rose-400 transition-colors">
+            <LogOut className="w-3.5 h-3.5" /> Sign out
           </button>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-10 pb-20">
-        {/* Profile Header */}
-        <div className="flex flex-col sm:flex-row items-start gap-5 mb-8">
-          <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="w-28 h-28 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-4xl font-bold border-4 border-[#050505] shadow-xl flex-shrink-0">
-            {initials}
-          </motion.div>
-          <div className="flex-1 pt-4">
-            <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl font-display font-bold">{fullName}</h1>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${isStudent ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' : 'bg-purple-500/10 border-purple-500/20 text-purple-400'}`}>
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 space-y-5">
+
+        {/* Identity */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+          className="flex items-start gap-4">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 grid place-items-center text-2xl font-bold flex-shrink-0">
+            {fullName.charAt(0).toUpperCase()}
+          </div>
+          <div className="min-w-0 pt-1">
+            <div className="flex items-center gap-2 mb-1">
+              <h1 className="text-xl font-display font-bold truncate">{fullName}</h1>
+              <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-medium border bg-purple-500/10 border-purple-500/20 text-purple-300">
                 {isStudent ? 'Student' : 'Mentor'}
               </span>
             </div>
-            <p className="text-sm text-gray-400 mb-2">{user?.email}</p>
-            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
-              {isStudent ? (
-                <>
-                  {major && <span className="flex items-center gap-1"><Building className="w-3.5 h-3.5" />{major}</span>}
-                  {university && <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{university}</span>}
-                  {year && <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{year}</span>}
-                </>
-              ) : (
-                <>
-                  {organization && <span className="flex items-center gap-1"><Building className="w-3.5 h-3.5" />{organization}</span>}
-                  {yearsExp && <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{yearsExp} yrs experience</span>}
-                </>
-              )}
+            <p className="text-sm text-gray-500 truncate">{user.email}</p>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-gray-500">
+              {facts.filter((f) => f.value).map((f) => (
+                <span key={f.value} className="flex items-center gap-1.5">
+                  <f.icon className="w-3.5 h-3.5" />{f.value}
+                </span>
+              ))}
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          {/* Left Column */}
-          <div className="lg:col-span-2 space-y-5">
-            
-
-            {/* Skills / Expertise */}
-            {skills.length > 0 && (
-              <div className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                  <Star className="w-4 h-4 text-purple-400" />
-                  {isStudent ? 'Skills & Interests' : 'Areas of Expertise'}
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {skills.map((skill, i) => (
-                    <span key={i} className="px-2.5 py-1 rounded-full text-xs font-medium bg-purple-500/10 border border-purple-500/20 text-purple-400">{skill}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Contribution Heatmap */}
-            <div className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-              <h3 className="text-sm font-semibold mb-4 flex items-center gap-2"><Activity className="w-4 h-4 text-green-400" />Contribution Activity</h3>
-              <div className="overflow-x-auto"><HeatmapGrid /></div>
-              <div className="flex items-center gap-2 mt-3 text-[10px] text-gray-500">
-                <span>Less</span>
-                {['bg-white/[0.03]', 'bg-purple-500/20', 'bg-purple-500/40', 'bg-purple-500/60', 'bg-purple-500/80'].map((c, i) => (
-                  <div key={i} className={`w-[10px] h-[10px] rounded-sm ${c}`} />
-                ))}
-                <span>More</span>
-              </div>
-            </div>
-
-            {/* Achievements */}
-            <div className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2"><Award className="w-4 h-4 text-amber-400" />Achievements</h3>
-              <div className="flex flex-wrap gap-2">
-                {['🏆 First Project', '🚀 Getting Started', '👥 Team Player'].map((a, i) => (
-                  <motion.span key={i} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: i * 0.1, type: 'spring' }}
-                    className="px-3 py-1.5 rounded-full text-xs font-medium bg-amber-500/[0.06] border border-amber-500/15 text-amber-400">{a}</motion.span>
-                ))}
-              </div>
-            </div>
+        {skills.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {skills.map((s) => (
+              <span key={s} className="px-2.5 py-1 rounded-lg text-xs font-medium bg-white/[0.04] border border-white/[0.07] text-gray-300">{s}</span>
+            ))}
           </div>
+        )}
 
-          {/* Right Column */}
-          <div className="space-y-5">
-            {/* Account Info */}
-            <div className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-              <h3 className="text-sm font-semibold mb-3">Account</h3>
-              <div className="space-y-2 text-xs text-gray-400">
-                <div className="flex justify-between">
-                  <span>Email</span>
-                  <span className="text-gray-300 truncate ml-2 max-w-[160px]">{user?.email}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Role</span>
-                  <span className={isStudent ? 'text-purple-400' : 'text-purple-400'}>{isStudent ? 'Student' : 'Mentor'}</span>
-                </div>
-                {isStudent && university && (
-                  <div className="flex justify-between">
-                    <span>University</span>
-                    <span className="text-gray-300 truncate ml-2 max-w-[160px]">{university}</span>
+        {/* Projects you own */}
+        <Panel title="Your projects" icon={FolderOpen} count={projects.length}>
+          {projects.length === 0 ? (
+            <Empty>
+              You haven&apos;t posted a project yet.{' '}
+              <button onClick={() => router.push('/projects/new')} className="text-purple-400 hover:text-purple-300 transition-colors">
+                Post one
+              </button>.
+            </Empty>
+          ) : (
+            <div className="space-y-2">
+              {projects.map((p) => (
+                <button key={p.id} onClick={() => router.push(`/workspace/${p.id}`)}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] hover:border-white/[0.14] hover:bg-white/[0.03] transition-all text-left group">
+                  {p.image_url ? (
+                    <img src={p.image_url} alt="" className="w-9 h-9 rounded-lg object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="w-9 h-9 rounded-lg flex-shrink-0 bg-gradient-to-br from-violet-500/30 to-purple-600/30" />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-white truncate">{p.title}</p>
+                    <p className="text-xs text-gray-600 truncate">{p.dept || 'Project'}</p>
                   </div>
-                )}
-                {isStudent && year && (
-                  <div className="flex justify-between">
-                    <span>Year</span>
-                    <span className="text-gray-300">{year}</span>
-                  </div>
-                )}
-                {!isStudent && organization && (
-                  <div className="flex justify-between">
-                    <span>Organization</span>
-                    <span className="text-gray-300 truncate ml-2 max-w-[160px]">{organization}</span>
-                  </div>
-                )}
-              </div>
+                  {!p.is_public && (
+                    <span className="flex-shrink-0 text-[10px] px-2 py-0.5 rounded-full bg-white/[0.05] text-gray-500 border border-white/[0.08]">Private</span>
+                  )}
+                  <ExternalLink className="w-3.5 h-3.5 text-gray-600 group-hover:text-gray-300 flex-shrink-0 transition-colors" />
+                </button>
+              ))}
             </div>
+          )}
+        </Panel>
 
-            {/* Activity Timeline */}
-            <div className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-              <h3 className="text-sm font-semibold mb-4">Activity</h3>
-              <div className="space-y-4 relative">
-                <div className="absolute left-[11px] top-2 bottom-2 w-px bg-white/[0.06]" />
-                {timeline.map((item, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }}
-                    className="flex items-start gap-3 relative">
-                    <div className={`w-6 h-6 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center flex-shrink-0 z-10 ${item.color}`}>
-                      <item.icon className="w-3 h-3" />
+        {/* Applications you sent */}
+        <Panel title="Your applications" icon={Send} count={applications.length}>
+          {applications.length === 0 ? (
+            <Empty>
+              No applications yet.{' '}
+              <button onClick={() => router.push('/')} className="text-purple-400 hover:text-purple-300 transition-colors">
+                Browse projects
+              </button>.
+            </Empty>
+          ) : (
+            <div className="space-y-2">
+              {applications.map((a) => {
+                const s = statusMeta[a.status] ?? statusMeta.pending;
+                return (
+                  <button key={a.id} onClick={() => router.push(`/projects/${a.project_id}`)}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] hover:border-white/[0.14] hover:bg-white/[0.03] transition-all text-left">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-white truncate">{a.role || 'Open to any role'}</p>
+                      <p className="text-xs text-gray-600">
+                        {new Date(a.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
                     </div>
-                    <div>
-                      <p className="text-xs text-gray-300">{item.action}</p>
-                      <p className="text-[10px] text-gray-600">{item.time}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
+                    <span className={`flex items-center gap-1 flex-shrink-0 text-[10px] font-medium px-2 py-1 rounded-full border ${s.cls}`}>
+                      <s.icon className="w-3 h-3" />{s.label}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
+          )}
+        </Panel>
 
-            {/* Feed CTA */}
-            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => router.push('/feed')}
-              className="w-full py-3.5 bg-gradient-to-r from-purple-500 to-violet-600 text-white font-semibold rounded-xl shadow-[0_0_25px_rgba(168,85,247,0.3)] hover:shadow-[0_0_40px_rgba(168,85,247,0.5)] transition-all text-sm flex items-center justify-center gap-2">
-              Go to Feed <ArrowRight className="w-4 h-4" />
-            </motion.button>
-          </div>
-        </div>
+        <button onClick={() => router.push('/feed')}
+          className="w-full py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm font-semibold text-gray-300 hover:text-white hover:bg-white/[0.08] transition-all flex items-center justify-center gap-2">
+          Go to feed <ArrowRight className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );

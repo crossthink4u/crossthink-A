@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { renderApplicationEmail } from '@/lib/email/applicationNotification';
 
 // Notifies a project owner by email that someone applied.
 // Called (fire-and-forget) right after an application row is inserted.
@@ -8,6 +9,11 @@ import { NextResponse } from 'next/server';
 // request body for email content: it re-reads the application row from the DB
 // with the service role and mails whatever is actually stored there. Spamming an
 // owner therefore requires really inserting an application, which RLS governs.
+//
+// It also answers uniformly ({ ok: true }) whatever happens. The service role can
+// read every row here, so a response that distinguished "application found" from
+// "not found" would let anyone probe whether a given person applied to a given
+// project. Real outcomes go to the server log only.
 
 export async function POST(request: Request) {
   const { projectId, email } = await request.json().catch(() => ({}));
@@ -16,11 +22,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'projectId and email are required' }, { status: 400 });
   }
 
+  const ok = () => NextResponse.json({ ok: true });
+
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const resendKey = process.env.RESEND_API_KEY;
   if (!serviceKey || !resendKey) {
     console.warn('[notify] SUPABASE_SERVICE_ROLE_KEY or RESEND_API_KEY not set — skipping email');
-    return NextResponse.json({ skipped: 'not configured' });
+    return ok();
   }
 
   const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey, {
@@ -37,7 +45,10 @@ export async function POST(request: Request) {
     .limit(1)
     .maybeSingle();
 
-  if (!app) return NextResponse.json({ error: 'application not found' }, { status: 404 });
+  if (!app) {
+    console.warn(`[notify] no application for project ${projectId}`);
+    return ok();
+  }
 
   const { data: project } = await admin
     .from('projects')
@@ -45,7 +56,10 @@ export async function POST(request: Request) {
     .eq('id', projectId)
     .maybeSingle();
 
-  if (!project) return NextResponse.json({ error: 'project not found' }, { status: 404 });
+  if (!project) {
+    console.warn(`[notify] project ${projectId} not found`);
+    return ok();
+  }
 
   const { data: owner } = await admin
     .from('profiles')
@@ -55,32 +69,39 @@ export async function POST(request: Request) {
 
   if (!owner?.email) {
     console.warn(`[notify] project ${projectId} owner has no email on file`);
-    return NextResponse.json({ skipped: 'owner has no email' });
+    return ok();
   }
 
   const origin = new URL(request.url).origin;
   const workspaceUrl = `${origin}/workspace/${projectId}`;
-  const row = (label: string, value?: string | null) =>
-    value ? `<tr><td style="padding:4px 12px 4px 0;color:#8b8b96">${label}</td><td style="padding:4px 0;color:#e7e7ee">${escapeHtml(value)}</td></tr>` : '';
 
-  const html = `
-    <div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#0b0b0d;padding:32px">
-      <div style="max-width:560px;margin:0 auto;background:#121216;border:1px solid #23232b;border-radius:16px;padding:28px">
-        <p style="margin:0 0 4px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#a855f7">New application</p>
-        <h1 style="margin:0 0 16px;font-size:20px;color:#fff">${escapeHtml(app.name)} applied to ${escapeHtml(project.title)}</h1>
-        <table style="border-collapse:collapse;font-size:14px;margin-bottom:24px">
-          ${row('Email', app.email)}
-          ${row('Role', app.role)}
-          ${row('Major', app.major)}
-          ${row('Tech stack', app.tech_stack)}
-          ${row('Motivation', app.motivation)}
-        </table>
-        <a href="${workspaceUrl}" style="display:inline-block;background:#8b5cf6;color:#fff;text-decoration:none;font-weight:600;font-size:14px;padding:12px 20px;border-radius:10px">
-          Review in workspace
-        </a>
-        <p style="margin:24px 0 0;font-size:12px;color:#6b6b78">CrossThink: by Iris</p>
-      </div>
-    </div>`;
+  const html = renderApplicationEmail({
+    projectTitle: project.title,
+    workspaceUrl,
+    applicantName: app.name,
+    ownerName: owner.full_name,
+    fields: [
+      ['Email', app.email],
+      ['Applying for', app.role],
+      ['Major', app.major],
+      ['Skills', app.tech_stack],
+    ],
+    motivation: app.motivation,
+  });
+
+  const text = [
+    `${app.name} applied to ${project.title}.`,
+    '',
+    `Email: ${app.email}`,
+    app.role ? `Applying for: ${app.role}` : null,
+    app.major ? `Major: ${app.major}` : null,
+    app.tech_stack ? `Skills: ${app.tech_stack}` : null,
+    app.motivation ? `\nWhy they want in:\n${app.motivation}` : null,
+    '',
+    `Review and approve: ${workspaceUrl}`,
+    '',
+    'CrossThink: by Iris',
+  ].filter((l) => l !== null).join('\n');
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -91,20 +112,17 @@ export async function POST(request: Request) {
       from: process.env.MAIL_FROM || 'CrossThink <onboarding@resend.dev>',
       to: owner.email,
       reply_to: app.email,
-      subject: `New application for ${project.title} — ${app.name}`,
+      subject: `${app.name} applied to ${project.title}`,
       html,
+      text,
     }),
   });
 
   if (!res.ok) {
-    const detail = await res.text();
-    console.error('[notify] resend failed', res.status, detail);
-    return NextResponse.json({ error: 'send failed', detail }, { status: 502 });
+    // never echo the upstream body back to a public caller
+    console.error('[notify] resend failed', res.status, await res.text());
+    return ok();
   }
 
-  return NextResponse.json({ sent: true });
-}
-
-function escapeHtml(s: string) {
-  return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
+  return ok();
 }

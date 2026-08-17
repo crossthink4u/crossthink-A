@@ -1,363 +1,59 @@
-'use client';
+import type { Metadata } from 'next';
+import { createClient } from '@/utils/supabase/server';
+import ProjectDetailView from '@/components/pages/ProjectDetailView';
 
-import React, { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import {
-  ArrowLeft, ArrowRight, Users, Clock, Calendar, Zap,
-  CheckCircle2, Hexagon, ChevronRight, ExternalLink,
-} from 'lucide-react';
-import { getProjectById, publicProjects, type Project } from '@/data/projects';
-import { createClient } from '@/utils/supabase/client';
-import type { DbProject } from '@/types/database';
+// Server shell: its only job is real per-project metadata, so a shared link shows the
+// project's own title, summary and cover instead of the generic site card.
+async function getProject(id: string) {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from('projects')
+      .select('title, description, dept, image_url, tech, is_public')
+      .eq('id', id)
+      .maybeSingle();
+    return data;
+  } catch {
+    return null;
+  }
+}
 
-// ── accent / difficulty maps ──────────────────────────────────────────────────
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const project = await getProject(id);
 
-const accentMap: Record<string, {
-  badge: string; dot: string; dotText: string; border: string; glow: string;
-  heading: string; btnBg: string; btnShadow: string; tag: string;
-}> = {
-  cyan:    { badge: 'bg-purple-500/10 text-purple-300 border-purple-500/20',    dot: 'bg-purple-400',    dotText: 'text-purple-400',    border: 'border-purple-500/30',   glow: 'shadow-[0_0_60px_rgba(168,85,247,0.08)]',   heading: 'from-purple-400 to-violet-500',     btnBg: 'from-purple-500 to-violet-600',     btnShadow: 'shadow-[0_0_24px_rgba(168,85,247,0.35)]',   tag: 'bg-purple-500/10 text-purple-300 border-purple-500/20' },
-  emerald: { badge: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20', dot: 'bg-emerald-400', dotText: 'text-emerald-400', border: 'border-emerald-500/30', glow: 'shadow-[0_0_60px_rgba(16,185,129,0.08)]', heading: 'from-emerald-400 to-teal-500',   btnBg: 'from-emerald-500 to-teal-600',  btnShadow: 'shadow-[0_0_24px_rgba(16,185,129,0.35)]', tag: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' },
-  amber:   { badge: 'bg-amber-500/10 text-amber-300 border-amber-500/20',  dot: 'bg-amber-400',   dotText: 'text-amber-400',   border: 'border-amber-500/30',  glow: 'shadow-[0_0_60px_rgba(245,158,11,0.08)]', heading: 'from-amber-400 to-orange-500',   btnBg: 'from-amber-500 to-orange-600',  btnShadow: 'shadow-[0_0_24px_rgba(245,158,11,0.35)]', tag: 'bg-amber-500/10 text-amber-300 border-amber-500/20' },
-  violet:  { badge: 'bg-violet-500/10 text-violet-300 border-violet-500/20', dot: 'bg-violet-400',  dotText: 'text-violet-400',  border: 'border-violet-500/30', glow: 'shadow-[0_0_60px_rgba(139,92,246,0.08)]', heading: 'from-violet-400 to-purple-500',  btnBg: 'from-violet-500 to-purple-600', btnShadow: 'shadow-[0_0_24px_rgba(139,92,246,0.35)]', tag: 'bg-violet-500/10 text-violet-300 border-violet-500/20' },
-  pink:    { badge: 'bg-pink-500/10 text-pink-300 border-pink-500/20',    dot: 'bg-pink-400',    dotText: 'text-pink-400',    border: 'border-pink-500/30',   glow: 'shadow-[0_0_60px_rgba(236,72,153,0.08)]', heading: 'from-pink-400 to-rose-500',     btnBg: 'from-pink-500 to-rose-600',     btnShadow: 'shadow-[0_0_24px_rgba(236,72,153,0.35)]', tag: 'bg-pink-500/10 text-pink-300 border-pink-500/20' },
-  sky:     { badge: 'bg-violet-500/10 text-violet-300 border-violet-500/20',      dot: 'bg-violet-400',     dotText: 'text-violet-400',     border: 'border-violet-500/30',    glow: 'shadow-[0_0_60px_rgba(14,165,233,0.08)]',  heading: 'from-violet-400 to-purple-500',      btnBg: 'from-violet-500 to-purple-600',      btnShadow: 'shadow-[0_0_24px_rgba(14,165,233,0.35)]',  tag: 'bg-violet-500/10 text-violet-300 border-violet-500/20' },
-};
+  if (!project) {
+    return { title: 'Project not found', robots: { index: false, follow: false } };
+  }
 
-const difficultyColor: Record<string, string> = {
-  Beginner:     'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-  Intermediate: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-  Advanced:     'text-rose-400 bg-rose-500/10 border-rose-500/20',
-};
+  const summary =
+    project.description?.slice(0, 200) ||
+    `An open ${project.dept ?? 'student'} project looking for collaborators on CrossThink.`;
 
-// ── normalize Supabase project → Project shape ────────────────────────────────
-
-function normalize(db: DbProject): Project {
   return {
-    id: db.id,
-    // ponytail: empty means "no banner" — better than a stock photo pretending to be the project
-    image: db.image_url || '',
-    title: db.title,
-    tagline: db.description ? db.description.slice(0, 120) : db.title,
-    description: db.description || '',
-    dept: db.dept || 'Project',
-    category: db.dept || 'Project',
-    tags: [],
-    tech: db.tech || [],
-    openRoles: (db.open_roles || []).map((r) => ({ title: r.title, skills: r.skills || [], count: r.count || 1 })),
-    teamSize: { filled: 0, capacity: db.team_size_capacity || 10 },
-    owner: 'Project Owner',
-    ownerRole: 'Posted on CrossThink',
-    ownerAvatar: 'https://i.pravatar.cc/150?img=12',
-    deadline: db.deadline || 'Open',
-    duration: db.duration || 'Flexible',
-    difficulty: (db.difficulty as Project['difficulty']) || 'Intermediate',
-    gradient: 'linear-gradient(135deg,#06b6d4,#3b82f6)',
-    accentColor: 'cyan',
-    perks: [],
-    highlights: [],
+    title: project.title,
+    description: summary,
+    keywords: project.tech?.length ? project.tech : undefined,
+    alternates: { canonical: `/projects/${id}` },
+    // private projects stay out of search results even if the URL leaks
+    robots: project.is_public ? undefined : { index: false, follow: false },
+    openGraph: {
+      type: 'article',
+      title: project.title,
+      description: summary,
+      url: `/projects/${id}`,
+      images: project.image_url ? [{ url: project.image_url, alt: project.title }] : undefined,
+    },
+    twitter: {
+      card: project.image_url ? 'summary_large_image' : 'summary',
+      title: project.title,
+      description: summary,
+      images: project.image_url ? [project.image_url] : undefined,
+    },
   };
 }
 
-// ── page ──────────────────────────────────────────────────────────────────────
-
-export default function ProjectDetailPage() {
-  const { id } = useParams<{ id: string }>();
-  const router = useRouter();
-  const supabase = createClient();
-  const [project, setProject] = useState<Project | null>(getProjectById(id) ?? null);
-  const [loading, setLoading] = useState(!getProjectById(id));
-  const [fetchError, setFetchError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (project) return;
-    supabase.from('projects').select('*').eq('id', id).single()
-      .then(
-        ({ data, error }) => {
-          if (error) setFetchError(error.message);
-          else if (data) setProject(normalize(data as DbProject));
-          setLoading(false);
-        },
-        (err: Error) => {
-          setFetchError(err.message);
-          setLoading(false);
-        }
-      );
-  }, [id]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#050505] text-white flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (fetchError) {
-    return (
-      <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center gap-3 px-4 text-center">
-        <p className="text-rose-400 text-lg font-medium">Couldn&apos;t load this project</p>
-        <p className="text-gray-500 text-sm max-w-sm">{fetchError}</p>
-        <button onClick={() => router.push('/')} className="mt-4 px-5 py-2.5 rounded-xl bg-white/[0.06] border border-white/10 text-sm text-gray-300 hover:text-white transition-colors">
-          Back home
-        </button>
-      </div>
-    );
-  }
-
-  if (!project) {
-    return (
-      <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center gap-6">
-        <p className="text-gray-400 text-lg">Project not found.</p>
-        <button onClick={() => router.push('/')} className="flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Back to projects
-        </button>
-      </div>
-    );
-  }
-
-  const accent = accentMap[project.accentColor] ?? accentMap.cyan;
-  const openCount = project.openRoles.reduce((s, r) => s + r.count, 0);
-  const fillPct = Math.round((project.teamSize.filled / project.teamSize.capacity) * 100);
-  const related = publicProjects.filter((p) => p.id !== project.id && p.category === project.category).slice(0, 2);
-
-  return (
-    <div className="min-h-screen bg-[#050505] text-white antialiased selection:bg-purple-500/30 selection:text-purple-100">
-      <div className="h-0.5 w-full" style={{ background: project.gradient }} />
-
-      {/* Navbar */}
-      <header className="sticky top-0 z-40 bg-[#050505]/80 backdrop-blur-xl border-b border-white/[0.06]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <button onClick={() => router.push('/')} className="flex items-center gap-2.5 group">
-            <motion.div whileHover={{ rotate: 180 }} transition={{ duration: 0.5 }}>
-              <Hexagon className="w-7 h-7 text-purple-400" fill="currentColor" fillOpacity={0.15} />
-            </motion.div>
-            <span className="font-display font-bold text-lg tracking-tight text-white">
-              Cross<span className="bg-gradient-to-r from-purple-400 to-violet-500 bg-clip-text text-transparent">Think</span><span className="font-normal text-gray-500">: by Iris</span>
-            </span>
-          </button>
-          <button onClick={() => router.back()} className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Back
-          </button>
-        </div>
-      </header>
-
-      {/* Banner */}
-      {project.image && (
-        <div className="relative h-56 sm:h-72 lg:h-80 w-full overflow-hidden bg-[#0a0a0a]">
-          <motion.img
-            initial={{ scale: 1.06, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-            src={project.image}
-            alt=""
-            className="w-full h-full object-cover"
-          />
-          {/* fade into the page so the banner has no hard edge */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/35 to-[#050505]/20" />
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#050505] to-transparent" />
-        </div>
-      )}
-
-      {/* Hero */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
-          backgroundSize: '60px 60px',
-        }} />
-        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 60% 50% at 50% 0%, rgba(168,85,247,0.06), transparent)` }} />
-
-        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 ${project.image ? 'pt-8' : 'pt-16'}`}>
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}>
-            <div className="flex items-center gap-2 text-sm text-gray-600 mb-8">
-              <button onClick={() => router.push('/')} className="hover:text-gray-400 transition-colors">Home</button>
-              <ChevronRight className="w-3.5 h-3.5" />
-              <span className="text-gray-400 truncate max-w-[200px]">{project.title}</span>
-            </div>
-
-            <div className="flex flex-wrap gap-2 mb-5">
-              <span className={`inline-flex items-center text-xs font-medium px-3 py-1 rounded-full border ${accent.badge}`}>{project.category}</span>
-              <span className={`inline-flex items-center text-xs font-medium px-3 py-1 rounded-full border ${difficultyColor[project.difficulty] ?? 'border-white/10 text-gray-400'}`}>{project.difficulty}</span>
-              <span className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1 rounded-full border border-white/10 text-gray-400">
-                <Zap className="w-3 h-3 text-amber-400" />{openCount} open {openCount === 1 ? 'role' : 'roles'}
-              </span>
-            </div>
-
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight">{project.title}</h1>
-            <p className={`text-xl font-medium bg-gradient-to-r ${accent.heading} bg-clip-text text-transparent mb-6`}>{project.tagline}</p>
-
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-              <span className="flex items-center gap-1.5">
-                <img src={project.ownerAvatar} alt={project.owner} className="w-5 h-5 rounded-full object-cover" />
-                {project.owner} · {project.ownerRole}
-              </span>
-              <span className="flex items-center gap-1"><Calendar className="w-4 h-4" />Deadline: {project.deadline}</span>
-              <span className="flex items-center gap-1"><Clock className="w-4 h-4" />{project.duration}</span>
-              <span className="flex items-center gap-1"><Users className="w-4 h-4" />{project.teamSize.filled}/{project.teamSize.capacity} members</span>
-            </div>
-          </motion.div>
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-          {/* Left */}
-          <div className="lg:col-span-2 space-y-8">
-            {project.description && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}
-                className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-7">
-                <h2 className="font-display text-xl font-semibold text-white mb-4">About this project</h2>
-                <p className="text-gray-400 leading-relaxed text-[15px]">{project.description}</p>
-              </motion.div>
-            )}
-
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.15 }}
-              className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-7">
-              <h2 className="font-display text-xl font-semibold text-white mb-5">Open roles</h2>
-              <div className="space-y-4">
-                {project.openRoles.map((role) => (
-                  <div key={role.title} className={`flex items-start justify-between gap-4 p-4 rounded-xl border ${accent.border} bg-white/[0.03]`}>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className={`w-2 h-2 rounded-full flex-shrink-0 ${accent.dot}`} />
-                        <span className="font-semibold text-white text-sm">{role.title}</span>
-                        {role.count > 1 && <span className="text-xs text-gray-500">({role.count} spots)</span>}
-                      </div>
-                      <div className="flex flex-wrap gap-1.5 ml-4">
-                        {role.skills.map((skill) => (
-                          <span key={skill} className={`text-xs px-2 py-0.5 rounded-md border ${accent.tag}`}>{skill}</span>
-                        ))}
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => router.push(`/projects/${project.id}/apply?role=${encodeURIComponent(role.title)}`)}
-                      className={`flex-shrink-0 text-xs font-semibold px-4 py-2 rounded-lg bg-gradient-to-r ${accent.btnBg} text-white transition-all hover:opacity-90`}
-                    >
-                      Apply
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {project.highlights.length > 0 && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
-                className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-7">
-                <h2 className="font-display text-xl font-semibold text-white mb-4">Highlights</h2>
-                <ul className="space-y-3">
-                  {project.highlights.map((h) => (
-                    <li key={h} className="flex items-start gap-3 text-gray-400 text-sm">
-                      <CheckCircle2 className={`w-4 h-4 mt-0.5 flex-shrink-0 ${accent.dotText}`} />{h}
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            )}
-
-            {project.tech.length > 0 && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.25 }}
-                className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-7">
-                <h2 className="font-display text-xl font-semibold text-white mb-4">Tech stack</h2>
-                <div className="flex flex-wrap gap-2">
-                  {project.tech.map((t) => (
-                    <span key={t} className="px-3 py-1.5 rounded-lg bg-white/[0.05] border border-white/[0.1] text-gray-300 text-sm font-medium">{t}</span>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </div>
-
-          {/* Right sidebar */}
-          <div className="space-y-6">
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
-              className={`rounded-2xl border ${accent.border} bg-white/[0.025] p-6 ${accent.glow}`}>
-              <div className="mb-5">
-                <div className="flex justify-between text-xs text-gray-500 mb-1.5">
-                  <span>Team filled</span><span>{fillPct}%</span>
-                </div>
-                <div className="h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
-                  <div className="h-full rounded-full transition-all" style={{ width: `${fillPct}%`, background: project.gradient }} />
-                </div>
-                <p className="text-xs text-gray-600 mt-1.5">
-                  {project.teamSize.capacity - project.teamSize.filled} spot{project.teamSize.capacity - project.teamSize.filled !== 1 ? 's' : ''} remaining
-                </p>
-              </div>
-              <button
-                onClick={() => router.push(`/projects/${project.id}/apply`)}
-                className={`w-full py-3.5 rounded-xl font-semibold text-white bg-gradient-to-r ${accent.btnBg} ${accent.btnShadow} hover:opacity-90 transition-all duration-200 text-sm mb-3`}
-              >
-                Apply to this project <ArrowRight className="inline-block ml-2 w-4 h-4" />
-              </button>
-              <p className="text-center text-xs text-gray-600">No account required · Takes 2 minutes</p>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.25 }}
-              className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-6 space-y-4">
-              <h3 className="font-display font-semibold text-white">Project details</h3>
-              {[
-                { label: 'Department', value: project.dept },
-                { label: 'Duration', value: project.duration },
-                { label: 'Deadline', value: project.deadline },
-                { label: 'Difficulty', value: project.difficulty },
-              ].map(({ label, value }) => (
-                <div key={label} className="flex justify-between items-start gap-3">
-                  <span className="text-xs text-gray-600 flex-shrink-0">{label}</span>
-                  <span className="text-xs text-gray-300 text-right">{value}</span>
-                </div>
-              ))}
-            </motion.div>
-
-            {project.perks.length > 0 && (
-              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.3 }}
-                className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-6">
-                <h3 className="font-display font-semibold text-white mb-4">What you get</h3>
-                <ul className="space-y-2.5">
-                  {project.perks.map((perk) => (
-                    <li key={perk} className="flex items-center gap-2.5 text-xs text-gray-400">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />{perk}
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            )}
-
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.35 }}
-              className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-6">
-              <h3 className="font-display font-semibold text-white mb-4">Project lead</h3>
-              <div className="flex items-center gap-3">
-                <img src={project.ownerAvatar} alt={project.owner} className="w-10 h-10 rounded-full object-cover border border-white/10" />
-                <div>
-                  <p className="text-sm font-medium text-white">{project.owner}</p>
-                  <p className="text-xs text-gray-500">{project.ownerRole}</p>
-                </div>
-              </div>
-            </motion.div>
-
-            {related.length > 0 && (
-              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.4 }}
-                className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-6">
-                <h3 className="font-display font-semibold text-white mb-4">Related projects</h3>
-                <div className="space-y-3">
-                  {related.map((rp) => (
-                    <button key={rp.id} onClick={() => router.push(`/projects/${rp.id}`)}
-                      className="w-full flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] hover:border-white/[0.15] hover:bg-white/[0.04] transition-all text-left group">
-                      <div className="w-8 h-8 rounded-lg flex-shrink-0" style={{ background: rp.gradient }} />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-medium text-white truncate group-hover:text-purple-200 transition-colors">{rp.title}</p>
-                        <p className="text-xs text-gray-600">{rp.dept}</p>
-                      </div>
-                      <ExternalLink className="w-3.5 h-3.5 text-gray-600 group-hover:text-gray-400 flex-shrink-0 transition-colors" />
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <ProjectDetailView id={id} />;
 }

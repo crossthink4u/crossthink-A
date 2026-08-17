@@ -19,16 +19,14 @@ import {
   Send,
   ShieldCheck,
 } from 'lucide-react';
-import { getProjectById } from '@/data/projects';
 import { createClient } from '@/utils/supabase/client';
 
-const accentMap: Record<string, { gradient: string; btnBg: string; btnShadow: string; ring: string; dot: string }> = {
-  cyan:    { gradient: 'from-purple-400 to-violet-500',     btnBg: 'from-purple-500 to-violet-600',     btnShadow: 'shadow-[0_0_24px_rgba(168,85,247,0.35)]',   ring: 'focus:ring-purple-500/40',    dot: 'bg-purple-400' },
-  emerald: { gradient: 'from-emerald-400 to-teal-500',  btnBg: 'from-emerald-500 to-teal-600',  btnShadow: 'shadow-[0_0_24px_rgba(16,185,129,0.35)]',  ring: 'focus:ring-emerald-500/40', dot: 'bg-emerald-400' },
-  amber:   { gradient: 'from-amber-400 to-orange-500',  btnBg: 'from-amber-500 to-orange-600',  btnShadow: 'shadow-[0_0_24px_rgba(245,158,11,0.35)]',  ring: 'focus:ring-amber-500/40',   dot: 'bg-amber-400' },
-  violet:  { gradient: 'from-violet-400 to-purple-500', btnBg: 'from-violet-500 to-purple-600', btnShadow: 'shadow-[0_0_24px_rgba(139,92,246,0.35)]',  ring: 'focus:ring-violet-500/40',  dot: 'bg-violet-400' },
-  pink:    { gradient: 'from-pink-400 to-rose-500',     btnBg: 'from-pink-500 to-rose-600',     btnShadow: 'shadow-[0_0_24px_rgba(236,72,153,0.35)]',  ring: 'focus:ring-pink-500/40',    dot: 'bg-pink-400' },
-  sky:     { gradient: 'from-violet-400 to-purple-500',      btnBg: 'from-violet-500 to-purple-600',      btnShadow: 'shadow-[0_0_24px_rgba(14,165,233,0.35)]',  ring: 'focus:ring-violet-500/40',     dot: 'bg-violet-400' },
+const accent = {
+  gradient: 'from-purple-400 to-violet-500',
+  btnBg: 'from-violet-500 to-purple-600',
+  btnShadow: 'shadow-[0_0_24px_rgba(168,85,247,0.35)]',
+  ring: 'focus:ring-purple-500/40',
+  dot: 'bg-purple-400',
 };
 
 type FormData = {
@@ -59,7 +57,6 @@ export default function ApplyPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  const hardcoded = getProjectById(id);
   const prefilledRole = searchParams.get('role') ?? '';
 
   const [step, setStep] = useState(1);
@@ -68,6 +65,9 @@ export default function ApplyPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [authedName, setAuthedName] = useState('');
   const [dbTitle, setDbTitle] = useState('');
+  const [projectTech, setProjectTech] = useState<string[]>([]);
+  const [projectDept, setProjectDept] = useState('');
+  const [projectRoles, setProjectRoles] = useState<{ title: string; count: number }[]>([]);
   const [form, setForm] = useState<FormData>({
     name: '',
     email: '',
@@ -99,16 +99,17 @@ export default function ApplyPage() {
       }));
     });
 
-    // If not a hardcoded project, fetch title from Supabase
-    if (!hardcoded) {
-      supabase.from('projects').select('title').eq('id', id).single()
-        .then(({ data }) => { if (data) setDbTitle(data.title); });
-    }
+    supabase.from('projects').select('title, tech, dept, open_roles').eq('id', id).maybeSingle()
+      .then(({ data }) => {
+        if (!data) return;
+        setDbTitle(data.title);
+        setProjectTech(data.tech ?? []);
+        setProjectDept(data.dept ?? '');
+        setProjectRoles(data.open_roles ?? []);
+      });
   }, []);
 
-  const project = hardcoded;
-  const projectTitle = project?.title ?? dbTitle ?? 'this project';
-  const accent = accentMap[project?.accentColor ?? 'cyan'] ?? accentMap.cyan;
+  const projectTitle = dbTitle || 'this project';
 
   const set = (field: keyof FormData) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -203,7 +204,7 @@ export default function ApplyPage() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white antialiased selection:bg-purple-500/30 selection:text-purple-100">
-      <div className="h-0.5 w-full" style={{ background: project?.gradient ?? 'linear-gradient(90deg,#06b6d4,#3b82f6)' }} />
+      <div className="h-0.5 w-full bg-gradient-to-r from-violet-500 to-purple-500" />
 
       {/* Navbar */}
       <header className="sticky top-0 z-40 bg-[#050505]/80 backdrop-blur-xl border-b border-white/[0.06]">
@@ -237,7 +238,7 @@ export default function ApplyPage() {
         >
           <div className="flex items-center gap-2 mb-1.5">
             <span className={`w-2 h-2 rounded-full ${accent.dot}`} />
-            <span className="text-sm text-gray-500 font-medium">{project?.category ?? 'Project'}</span>
+            <span className="text-sm text-gray-500 font-medium">{projectDept || 'Project'}</span>
           </div>
           <h1 className="font-display text-3xl sm:text-4xl font-bold text-white mb-2">
             Apply to{' '}
@@ -335,7 +336,7 @@ export default function ApplyPage() {
                   <div>
                     <label className="block text-xs font-medium text-gray-400 mb-1.5">
                       Which role are you applying for?
-                      {(project?.openRoles?.length ?? 0) !== 1 ? ' (optional)' : ''}
+                      <span className="ml-1.5 text-gray-600">(optional)</span>
                     </label>
                     <select
                       value={form.role}
@@ -343,7 +344,7 @@ export default function ApplyPage() {
                       className={`${inputCls(accent.ring)} appearance-none`}
                     >
                       <option value="">I&apos;m open to any role</option>
-                      {(project?.openRoles ?? []).map((r) => (
+                      {projectRoles.filter((r) => r.title).map((r) => (
                         <option key={r.title} value={r.title}>{r.title}</option>
                       ))}
                     </select>
@@ -389,8 +390,8 @@ export default function ApplyPage() {
                       placeholder="e.g. React, Python, Figma, PyTorch..."
                       className={inputCls(accent.ring)}
                     />
-                    {project?.tech?.length > 0 && (
-                      <p className="text-xs text-gray-600 mt-1.5">Comma-separated. The project uses: {project.tech.slice(0, 3).join(', ')}{project.tech.length > 3 ? ', ...' : '.'}</p>
+                    {projectTech.length > 0 && (
+                      <p className="text-xs text-gray-600 mt-1.5">Comma-separated. The project uses: {projectTech.slice(0, 3).join(', ')}{projectTech.length > 3 ? ', …' : '.'}</p>
                     )}
                   </div>
 
@@ -497,7 +498,7 @@ export default function ApplyPage() {
           <div className="flex items-center justify-between mt-8">
             <button
               type="button"
-              onClick={() => step > 1 ? setStep(s => s - 1) : router.push(`/projects/${project.id}`)}
+              onClick={() => step > 1 ? setStep(s => s - 1) : router.push(`/projects/${id}`)}
               className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />

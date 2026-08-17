@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Funnel Display', system-ui, sans-serif;
-  --font-display: 'Funnel Display', system-ui, sans-serif;
+  --font-sans: var(--font-funnel), system-ui, sans-serif;
+  --font-display: var(--font-funnel), system-ui, sans-serif;
   
   --color-matte: #0a0a0a;
   --color-matte-light: #121212;
