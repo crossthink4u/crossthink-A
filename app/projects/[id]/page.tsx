@@ -17,12 +17,12 @@ const accentMap: Record<string, {
   badge: string; dot: string; dotText: string; border: string; glow: string;
   heading: string; btnBg: string; btnShadow: string; tag: string;
 }> = {
-  cyan:    { badge: 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20',    dot: 'bg-cyan-400',    dotText: 'text-cyan-400',    border: 'border-cyan-500/30',   glow: 'shadow-[0_0_60px_rgba(0,240,255,0.08)]',   heading: 'from-cyan-400 to-blue-500',     btnBg: 'from-cyan-500 to-blue-600',     btnShadow: 'shadow-[0_0_24px_rgba(0,240,255,0.35)]',   tag: 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20' },
+  cyan:    { badge: 'bg-purple-500/10 text-purple-300 border-purple-500/20',    dot: 'bg-purple-400',    dotText: 'text-purple-400',    border: 'border-purple-500/30',   glow: 'shadow-[0_0_60px_rgba(168,85,247,0.08)]',   heading: 'from-purple-400 to-violet-500',     btnBg: 'from-purple-500 to-violet-600',     btnShadow: 'shadow-[0_0_24px_rgba(168,85,247,0.35)]',   tag: 'bg-purple-500/10 text-purple-300 border-purple-500/20' },
   emerald: { badge: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20', dot: 'bg-emerald-400', dotText: 'text-emerald-400', border: 'border-emerald-500/30', glow: 'shadow-[0_0_60px_rgba(16,185,129,0.08)]', heading: 'from-emerald-400 to-teal-500',   btnBg: 'from-emerald-500 to-teal-600',  btnShadow: 'shadow-[0_0_24px_rgba(16,185,129,0.35)]', tag: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' },
   amber:   { badge: 'bg-amber-500/10 text-amber-300 border-amber-500/20',  dot: 'bg-amber-400',   dotText: 'text-amber-400',   border: 'border-amber-500/30',  glow: 'shadow-[0_0_60px_rgba(245,158,11,0.08)]', heading: 'from-amber-400 to-orange-500',   btnBg: 'from-amber-500 to-orange-600',  btnShadow: 'shadow-[0_0_24px_rgba(245,158,11,0.35)]', tag: 'bg-amber-500/10 text-amber-300 border-amber-500/20' },
   violet:  { badge: 'bg-violet-500/10 text-violet-300 border-violet-500/20', dot: 'bg-violet-400',  dotText: 'text-violet-400',  border: 'border-violet-500/30', glow: 'shadow-[0_0_60px_rgba(139,92,246,0.08)]', heading: 'from-violet-400 to-purple-500',  btnBg: 'from-violet-500 to-purple-600', btnShadow: 'shadow-[0_0_24px_rgba(139,92,246,0.35)]', tag: 'bg-violet-500/10 text-violet-300 border-violet-500/20' },
   pink:    { badge: 'bg-pink-500/10 text-pink-300 border-pink-500/20',    dot: 'bg-pink-400',    dotText: 'text-pink-400',    border: 'border-pink-500/30',   glow: 'shadow-[0_0_60px_rgba(236,72,153,0.08)]', heading: 'from-pink-400 to-rose-500',     btnBg: 'from-pink-500 to-rose-600',     btnShadow: 'shadow-[0_0_24px_rgba(236,72,153,0.35)]', tag: 'bg-pink-500/10 text-pink-300 border-pink-500/20' },
-  sky:     { badge: 'bg-sky-500/10 text-sky-300 border-sky-500/20',      dot: 'bg-sky-400',     dotText: 'text-sky-400',     border: 'border-sky-500/30',    glow: 'shadow-[0_0_60px_rgba(14,165,233,0.08)]',  heading: 'from-sky-400 to-cyan-500',      btnBg: 'from-sky-500 to-cyan-600',      btnShadow: 'shadow-[0_0_24px_rgba(14,165,233,0.35)]',  tag: 'bg-sky-500/10 text-sky-300 border-sky-500/20' },
+  sky:     { badge: 'bg-violet-500/10 text-violet-300 border-violet-500/20',      dot: 'bg-violet-400',     dotText: 'text-violet-400',     border: 'border-violet-500/30',    glow: 'shadow-[0_0_60px_rgba(14,165,233,0.08)]',  heading: 'from-violet-400 to-purple-500',      btnBg: 'from-violet-500 to-purple-600',      btnShadow: 'shadow-[0_0_24px_rgba(14,165,233,0.35)]',  tag: 'bg-violet-500/10 text-violet-300 border-violet-500/20' },
 };
 
 const difficultyColor: Record<string, string> = {
@@ -36,7 +36,8 @@ const difficultyColor: Record<string, string> = {
 function normalize(db: DbProject): Project {
   return {
     id: db.id,
-    image: db.image_url || 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&auto=format&fit=crop',
+    // ponytail: empty means "no banner" — better than a stock photo pretending to be the project
+    image: db.image_url || '',
     title: db.title,
     tagline: db.description ? db.description.slice(0, 120) : db.title,
     description: db.description || '',
@@ -88,7 +89,7 @@ export default function ProjectDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#050505] text-white flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -109,7 +110,7 @@ export default function ProjectDetailPage() {
     return (
       <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center gap-6">
         <p className="text-gray-400 text-lg">Project not found.</p>
-        <button onClick={() => router.push('/')} className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors">
+        <button onClick={() => router.push('/')} className="flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Back to projects
         </button>
       </div>
@@ -122,7 +123,7 @@ export default function ProjectDetailPage() {
   const related = publicProjects.filter((p) => p.id !== project.id && p.category === project.category).slice(0, 2);
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white antialiased selection:bg-cyan-500/30 selection:text-cyan-100">
+    <div className="min-h-screen bg-[#050505] text-white antialiased selection:bg-purple-500/30 selection:text-purple-100">
       <div className="h-0.5 w-full" style={{ background: project.gradient }} />
 
       {/* Navbar */}
@@ -130,10 +131,10 @@ export default function ProjectDetailPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <button onClick={() => router.push('/')} className="flex items-center gap-2.5 group">
             <motion.div whileHover={{ rotate: 180 }} transition={{ duration: 0.5 }}>
-              <Hexagon className="w-7 h-7 text-cyan-400" fill="currentColor" fillOpacity={0.15} />
+              <Hexagon className="w-7 h-7 text-purple-400" fill="currentColor" fillOpacity={0.15} />
             </motion.div>
             <span className="font-display font-bold text-lg tracking-tight text-white">
-              Cross<span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">Think</span>
+              Cross<span className="bg-gradient-to-r from-purple-400 to-violet-500 bg-clip-text text-transparent">Think</span><span className="font-normal text-gray-500">: by Iris</span>
             </span>
           </button>
           <button onClick={() => router.back()} className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors">
@@ -142,15 +143,32 @@ export default function ProjectDetailPage() {
         </div>
       </header>
 
+      {/* Banner */}
+      {project.image && (
+        <div className="relative h-56 sm:h-72 lg:h-80 w-full overflow-hidden bg-[#0a0a0a]">
+          <motion.img
+            initial={{ scale: 1.06, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            src={project.image}
+            alt=""
+            className="w-full h-full object-cover"
+          />
+          {/* fade into the page so the banner has no hard edge */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/35 to-[#050505]/20" />
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#050505] to-transparent" />
+        </div>
+      )}
+
       {/* Hero */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.03]" style={{
           backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
           backgroundSize: '60px 60px',
         }} />
-        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 60% 50% at 50% 0%, rgba(0,240,255,0.06), transparent)` }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 60% 50% at 50% 0%, rgba(168,85,247,0.06), transparent)` }} />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
+        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 ${project.image ? 'pt-8' : 'pt-16'}`}>
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}>
             <div className="flex items-center gap-2 text-sm text-gray-600 mb-8">
               <button onClick={() => router.push('/')} className="hover:text-gray-400 transition-colors">Home</button>
@@ -328,7 +346,7 @@ export default function ProjectDetailPage() {
                       className="w-full flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] hover:border-white/[0.15] hover:bg-white/[0.04] transition-all text-left group">
                       <div className="w-8 h-8 rounded-lg flex-shrink-0" style={{ background: rp.gradient }} />
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs font-medium text-white truncate group-hover:text-cyan-200 transition-colors">{rp.title}</p>
+                        <p className="text-xs font-medium text-white truncate group-hover:text-purple-200 transition-colors">{rp.title}</p>
                         <p className="text-xs text-gray-600">{rp.dept}</p>
                       </div>
                       <ExternalLink className="w-3.5 h-3.5 text-gray-600 group-hover:text-gray-400 flex-shrink-0 transition-colors" />

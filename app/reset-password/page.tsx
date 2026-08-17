@@ -42,8 +42,8 @@ export default function ResetPasswordPage() {
     <div className="min-h-screen flex items-center justify-center bg-[#050505] px-4">
       <div className="w-full max-w-sm">
         <div className="flex items-center gap-2 mb-8 justify-center">
-          <Hexagon className="w-8 h-8 text-cyan-400" fill="currentColor" fillOpacity={0.15} />
-          <span className="font-display font-bold text-xl text-white">Cross<span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">Think</span></span>
+          <Hexagon className="w-8 h-8 text-purple-400" fill="currentColor" fillOpacity={0.15} />
+          <span className="font-display font-bold text-xl text-white">Cross<span className="bg-gradient-to-r from-purple-400 to-violet-500 bg-clip-text text-transparent">Think</span><span className="font-normal text-gray-500">: by Iris</span></span>
         </div>
 
         {done ? (
@@ -52,7 +52,7 @@ export default function ResetPasswordPage() {
             <p className="text-gray-500 text-sm mb-6">You can now sign in with your new password.</p>
             <button
               onClick={() => router.push('/login')}
-              className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-xl text-sm"
+              className="w-full py-3 bg-gradient-to-r from-purple-500 to-violet-600 text-white font-semibold rounded-xl text-sm"
             >
               Go to sign in
             </button>
@@ -77,7 +77,7 @@ export default function ResetPasswordPage() {
                   placeholder="New password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-white/[0.04] border border-white/[0.10] rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500/40 transition-all"
+                  className="w-full bg-white/[0.04] border border-white/[0.10] rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/40 transition-all"
                 />
               </div>
               <div className="relative">
@@ -87,13 +87,13 @@ export default function ResetPasswordPage() {
                   placeholder="Confirm new password"
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
-                  className="w-full bg-white/[0.04] border border-white/[0.10] rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500/40 transition-all"
+                  className="w-full bg-white/[0.04] border border-white/[0.10] rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/40 transition-all"
                 />
               </div>
               <button
                 disabled={loading}
                 type="submit"
-                className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-xl shadow-[0_0_25px_rgba(0,240,255,0.3)] flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                className="w-full py-3 bg-gradient-to-r from-purple-500 to-violet-600 text-white font-semibold rounded-xl shadow-[0_0_25px_rgba(168,85,247,0.3)] flex items-center justify-center gap-2 text-sm disabled:opacity-50"
               >
                 {loading ? 'Updating...' : 'Update password'} {!loading && <ArrowRight className="w-4 h-4" />}
               </button>

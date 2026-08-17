@@ -23,12 +23,12 @@ import { getProjectById } from '@/data/projects';
 import { createClient } from '@/utils/supabase/client';
 
 const accentMap: Record<string, { gradient: string; btnBg: string; btnShadow: string; ring: string; dot: string }> = {
-  cyan:    { gradient: 'from-cyan-400 to-blue-500',     btnBg: 'from-cyan-500 to-blue-600',     btnShadow: 'shadow-[0_0_24px_rgba(0,240,255,0.35)]',   ring: 'focus:ring-cyan-500/40',    dot: 'bg-cyan-400' },
+  cyan:    { gradient: 'from-purple-400 to-violet-500',     btnBg: 'from-purple-500 to-violet-600',     btnShadow: 'shadow-[0_0_24px_rgba(168,85,247,0.35)]',   ring: 'focus:ring-purple-500/40',    dot: 'bg-purple-400' },
   emerald: { gradient: 'from-emerald-400 to-teal-500',  btnBg: 'from-emerald-500 to-teal-600',  btnShadow: 'shadow-[0_0_24px_rgba(16,185,129,0.35)]',  ring: 'focus:ring-emerald-500/40', dot: 'bg-emerald-400' },
   amber:   { gradient: 'from-amber-400 to-orange-500',  btnBg: 'from-amber-500 to-orange-600',  btnShadow: 'shadow-[0_0_24px_rgba(245,158,11,0.35)]',  ring: 'focus:ring-amber-500/40',   dot: 'bg-amber-400' },
   violet:  { gradient: 'from-violet-400 to-purple-500', btnBg: 'from-violet-500 to-purple-600', btnShadow: 'shadow-[0_0_24px_rgba(139,92,246,0.35)]',  ring: 'focus:ring-violet-500/40',  dot: 'bg-violet-400' },
   pink:    { gradient: 'from-pink-400 to-rose-500',     btnBg: 'from-pink-500 to-rose-600',     btnShadow: 'shadow-[0_0_24px_rgba(236,72,153,0.35)]',  ring: 'focus:ring-pink-500/40',    dot: 'bg-pink-400' },
-  sky:     { gradient: 'from-sky-400 to-cyan-500',      btnBg: 'from-sky-500 to-cyan-600',      btnShadow: 'shadow-[0_0_24px_rgba(14,165,233,0.35)]',  ring: 'focus:ring-sky-500/40',     dot: 'bg-sky-400' },
+  sky:     { gradient: 'from-violet-400 to-purple-500',      btnBg: 'from-violet-500 to-purple-600',      btnShadow: 'shadow-[0_0_24px_rgba(14,165,233,0.35)]',  ring: 'focus:ring-violet-500/40',     dot: 'bg-violet-400' },
 };
 
 type FormData = {
@@ -141,6 +141,14 @@ export default function ApplyPage() {
         status: 'pending',
       });
       if (error) throw error;
+
+      // notify the owner — failures here must not fail the application
+      fetch('/api/applications/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId: id, email: form.email }),
+      }).catch(() => {});
+
       setSubmitted(true);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
@@ -182,7 +190,7 @@ export default function ApplyPage() {
               Back to project
             </button>
             <button
-              onClick={() => router.push('/landing#discover-projects')}
+              onClick={() => router.push('/')}
               className={`px-6 py-2.5 rounded-xl font-semibold text-white text-sm bg-gradient-to-r ${accent.btnBg} ${accent.btnShadow} hover:opacity-90 transition-all`}
             >
               Explore more projects
@@ -194,7 +202,7 @@ export default function ApplyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white antialiased selection:bg-cyan-500/30 selection:text-cyan-100">
+    <div className="min-h-screen bg-[#050505] text-white antialiased selection:bg-purple-500/30 selection:text-purple-100">
       <div className="h-0.5 w-full" style={{ background: project?.gradient ?? 'linear-gradient(90deg,#06b6d4,#3b82f6)' }} />
 
       {/* Navbar */}
@@ -202,10 +210,10 @@ export default function ApplyPage() {
         <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
           <button onClick={() => router.push('/')} className="flex items-center gap-2 group">
             <motion.div whileHover={{ rotate: 180 }} transition={{ duration: 0.5 }}>
-              <Hexagon className="w-7 h-7 text-cyan-400" fill="currentColor" fillOpacity={0.15} />
+              <Hexagon className="w-7 h-7 text-purple-400" fill="currentColor" fillOpacity={0.15} />
             </motion.div>
             <span className="font-display font-bold text-lg text-white">
-              Cross<span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">Think</span>
+              Cross<span className="bg-gradient-to-r from-purple-400 to-violet-500 bg-clip-text text-transparent">Think</span><span className="font-normal text-gray-500">: by Iris</span>
             </span>
           </button>
           <button

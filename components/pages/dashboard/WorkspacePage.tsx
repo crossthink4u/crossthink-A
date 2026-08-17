@@ -93,7 +93,7 @@ const WorkspacePage = () => {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${
                 activeTab === tab.id 
-                  ? 'bg-gradient-to-r from-cyan-500/20 to-blue-600/20 text-cyan-400 border border-cyan-500/30 shadow-[0_0_15px_rgba(0,240,255,0.1)]' 
+                  ? 'bg-gradient-to-r from-purple-500/20 to-violet-600/20 text-purple-400 border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.1)]' 
                   : 'text-gray-500 hover:text-white hover:bg-white/[0.04] border border-transparent'
               }`}
             >
@@ -130,7 +130,7 @@ const WorkspacePage = () => {
                           <div
                             ref={provided.innerRef}
                             {...provided.droppableProps}
-                            className={`flex-1 transition-colors rounded-xl min-h-[150px] ${snapshot.isDraggingOver ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
+                            className={`flex-1 transition-colors rounded-xl min-h-[150px] ${snapshot.isDraggingOver ? 'bg-violet-50/50 dark:bg-violet-900/10' : ''}`}
                           >
                             {tasks.map((task, index) => (
                               <Draggable key={task.id} draggableId={task.id} index={index}>
@@ -141,7 +141,7 @@ const WorkspacePage = () => {
                                     {...dragProvided.dragHandleProps}
                                     className={`mb-3 outline-none ${snapshot.isDragging ? 'rotate-2 scale-105' : ''}`}
                                   >
-                                    <GlassCard className="p-4 cursor-grab active:cursor-grabbing hover:border-cyan-500/30">
+                                    <GlassCard className="p-4 cursor-grab active:cursor-grabbing hover:border-purple-500/30">
                                       <div className="flex justify-between items-start mb-3">
                                         <PriorityBadge priority={task.priority} />
                                       </div>
@@ -242,7 +242,7 @@ const WorkspacePage = () => {
                 <label className="text-xs text-gray-500">Title</label>
                 <input
                   autoFocus
-                  className="mt-1 w-full rounded-lg border border-gray-200 dark:border-white/10 bg-transparent px-3 py-2 text-sm dark:text-white outline-none focus:border-cyan-500"
+                  className="mt-1 w-full rounded-lg border border-gray-200 dark:border-white/10 bg-transparent px-3 py-2 text-sm dark:text-white outline-none focus:border-purple-500"
                   value={draft.content}
                   onChange={(e) => setDraft((d) => ({ ...d, content: e.target.value }))}
                 />
@@ -250,7 +250,7 @@ const WorkspacePage = () => {
               <div>
                 <label className="text-xs text-gray-500">Priority</label>
                 <select
-                  className="mt-1 w-full rounded-lg border border-gray-200 dark:border-white/10 bg-transparent px-3 py-2 text-sm dark:text-white outline-none focus:border-cyan-500"
+                  className="mt-1 w-full rounded-lg border border-gray-200 dark:border-white/10 bg-transparent px-3 py-2 text-sm dark:text-white outline-none focus:border-purple-500"
                   value={draft.priority}
                   onChange={(e) => setDraft((d) => ({ ...d, priority: e.target.value }))}
                 >

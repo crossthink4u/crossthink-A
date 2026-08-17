@@ -28,9 +28,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
   const baseStyles = "relative inline-flex items-center justify-center font-medium transition-all duration-300 ease-out overflow-hidden rounded-full";
   
   const variants: Record<string, string> = {
-    primary: "bg-blue-600 hover:bg-blue-700 text-white shadow-[0_0_20px_rgba(0,85,255,0.4)] hover:shadow-[0_0_30px_rgba(0,85,255,0.6)] border border-blue-500/50",
+    primary: "bg-violet-600 hover:bg-violet-700 text-white shadow-[0_0_20px_rgba(124,58,237,0.4)] hover:shadow-[0_0_30px_rgba(124,58,237,0.6)] border border-violet-500/50",
     secondary: "glass text-gray-900 dark:text-white hover:bg-gray-100/50 dark:hover:bg-white/10 border-gray-200 dark:border-white/10",
-    outline: "border-2 border-cyan-500 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/10 shadow-[0_0_15px_rgba(0,240,255,0.1)] hover:shadow-[0_0_25px_rgba(0,240,255,0.3)]",
+    outline: "border-2 border-purple-500 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 shadow-[0_0_15px_rgba(168,85,247,0.1)] hover:shadow-[0_0_25px_rgba(168,85,247,0.3)]",
     ghost: "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/50 dark:hover:bg-white/5",
   };
 

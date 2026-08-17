@@ -31,7 +31,7 @@ export default function AIRecommendations() {
             </div>
             <h3 className="text-sm font-semibold text-white mb-1">{p.title}</h3>
             <p className="text-[11px] text-gray-500 mb-3">{p.reason}</p>
-            <button className="text-[11px] text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1">
+            <button className="text-[11px] text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1">
               {p.action} <ArrowRight className="w-2.5 h-2.5" />
             </button>
           </div>
@@ -40,10 +40,10 @@ export default function AIRecommendations() {
         {/* Recommended Teammates */}
         {teammates.map((t) => (
           <div key={t.id} className="group rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] transition-all p-4 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-cyan-500/[0.04] blur-[30px] rounded-full pointer-events-none" />
+            <div className="absolute top-0 right-0 w-20 h-20 bg-purple-500/[0.04] blur-[30px] rounded-full pointer-events-none" />
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <Users className="w-3.5 h-3.5 text-blue-400" />
+                <Users className="w-3.5 h-3.5 text-violet-400" />
                 <span className="text-xs text-gray-500">Teammate</span>
               </div>
               <span className="text-xs font-semibold text-emerald-400">{t.match}% match</span>
@@ -56,7 +56,7 @@ export default function AIRecommendations() {
               </div>
             </div>
             <p className="text-[11px] text-gray-500 mb-3">{t.reason}</p>
-            <button className="text-[11px] text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1">
+            <button className="text-[11px] text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1">
               Connect <ArrowRight className="w-2.5 h-2.5" />
             </button>
           </div>
@@ -75,7 +75,7 @@ export default function AIRecommendations() {
             <h3 className="text-sm font-semibold text-white mb-1">{m.name}</h3>
             <p className="text-[10px] text-gray-500 mb-1">{m.field}</p>
             <p className="text-[11px] text-gray-500 mb-3">{m.reason}</p>
-            <button className="text-[11px] text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1">
+            <button className="text-[11px] text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1">
               Request Intro <ArrowRight className="w-2.5 h-2.5" />
             </button>
           </div>

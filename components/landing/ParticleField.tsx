@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect, useCallback } from 'react';
 
-const ParticleField = ({ density = 80, color = '0, 240, 255', connectionDistance = 120, speed = 0.3, className = '' }) => {
+const ParticleField = ({ density = 80, color = '168, 85, 247', connectionDistance = 120, speed = 0.3, className = '' }) => {
   const canvasRef = useRef(null);
   const particlesRef = useRef([]);
   const mouseRef = useRef({ x: -1000, y: -1000 });

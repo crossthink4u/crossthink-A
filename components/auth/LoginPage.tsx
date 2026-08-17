@@ -89,12 +89,12 @@ const LoginPage = () => {
         </div>
         <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#050505]/80" />
         <div className="absolute top-1/3 left-1/4 w-[400px] h-[400px] bg-purple-600/20 rounded-full blur-[120px]" />
-        <div className="absolute bottom-1/3 right-1/4 w-[300px] h-[300px] bg-cyan-500/15 rounded-full blur-[100px]" />
+        <div className="absolute bottom-1/3 right-1/4 w-[300px] h-[300px] bg-purple-500/15 rounded-full blur-[100px]" />
         <div className="relative z-10 text-center px-12">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
             <div className="flex items-center justify-center gap-2 mb-8">
-              <Hexagon className="w-10 h-10 text-cyan-400" fill="currentColor" fillOpacity={0.15} />
-              <span className="font-display font-bold text-3xl text-white">Cross<span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">Think</span></span>
+              <Hexagon className="w-10 h-10 text-purple-400" fill="currentColor" fillOpacity={0.15} />
+              <span className="font-display font-bold text-3xl text-white">Cross<span className="bg-gradient-to-r from-purple-400 to-violet-500 bg-clip-text text-transparent">Think</span><span className="font-normal text-gray-500">: by Iris</span></span>
             </div>
             <h2 className="text-3xl font-display font-bold text-white mb-4">Welcome Back</h2>
             <p className="text-gray-400 text-base leading-relaxed max-w-sm mx-auto">Continue building the future with your team. Your projects are waiting.</p>
@@ -109,8 +109,8 @@ const LoginPage = () => {
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="w-full max-w-md relative z-10">
           {/* Mobile logo */}
           <div className="flex items-center gap-2 mb-8 lg:hidden">
-            <Hexagon className="w-8 h-8 text-cyan-400" fill="currentColor" fillOpacity={0.15} />
-            <span className="font-display font-bold text-xl text-white">Cross<span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">Think</span></span>
+            <Hexagon className="w-8 h-8 text-purple-400" fill="currentColor" fillOpacity={0.15} />
+            <span className="font-display font-bold text-xl text-white">Cross<span className="bg-gradient-to-r from-purple-400 to-violet-500 bg-clip-text text-transparent">Think</span><span className="font-normal text-gray-500">: by Iris</span></span>
           </div>
 
           <h1 className="text-2xl font-display font-bold text-white mb-2">Sign In</h1>
@@ -143,7 +143,7 @@ const LoginPage = () => {
                   placeholder="you@university.edu"
                   value={form.identifier}
                   onChange={(e) => setForm({ ...form, identifier: e.target.value })}
-                  className="w-full bg-white/[0.04] border border-white/[0.10] rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500/40 transition-all"
+                  className="w-full bg-white/[0.04] border border-white/[0.10] rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/40 transition-all"
                 />
               </div>
             </div>
@@ -152,7 +152,7 @@ const LoginPage = () => {
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="text-xs font-medium text-gray-400">Password</label>
-                <button type="button" onClick={handleForgotPassword} className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors">Forgot Password?</button>
+                <button type="button" onClick={handleForgotPassword} className="text-xs text-purple-400 hover:text-purple-300 transition-colors">Forgot Password?</button>
               </div>
               <div className="relative">
                 <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
@@ -163,7 +163,7 @@ const LoginPage = () => {
                   placeholder="Enter your password"
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  className="w-full bg-white/[0.04] border border-white/[0.10] rounded-xl pl-10 pr-11 py-3 text-sm text-white placeholder-gray-600 outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500/40 transition-all"
+                  className="w-full bg-white/[0.04] border border-white/[0.10] rounded-xl pl-10 pr-11 py-3 text-sm text-white placeholder-gray-600 outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/40 transition-all"
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors">
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -174,7 +174,7 @@ const LoginPage = () => {
             {/* Remember me */}
             <div className="flex items-center gap-2">
               <button type="button" onClick={() => setRememberMe(!rememberMe)}
-                className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${rememberMe ? 'bg-cyan-500 border-cyan-500' : 'border-white/20 bg-transparent'}`}>
+                className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${rememberMe ? 'bg-purple-500 border-purple-500' : 'border-white/20 bg-transparent'}`}>
                 {rememberMe && <span className="text-white text-[8px]">✓</span>}
               </button>
               <span className="text-xs text-gray-400">Remember me</span>
@@ -182,7 +182,7 @@ const LoginPage = () => {
 
             {/* Submit */}
             <motion.button disabled={loading} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }} type="submit"
-              className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-xl shadow-[0_0_25px_rgba(0,240,255,0.3)] hover:shadow-[0_0_40px_rgba(0,240,255,0.5)] transition-all duration-300 flex items-center justify-center gap-2 text-sm disabled:opacity-50">
+              className="w-full py-3.5 bg-gradient-to-r from-purple-500 to-violet-600 text-white font-semibold rounded-xl shadow-[0_0_25px_rgba(168,85,247,0.3)] hover:shadow-[0_0_40px_rgba(168,85,247,0.5)] transition-all duration-300 flex items-center justify-center gap-2 text-sm disabled:opacity-50">
               {loading ? 'Signing in...' : 'Sign In'} {!loading && <ArrowRight className="w-4 h-4" />}
             </motion.button>
           </form>
@@ -204,7 +204,7 @@ const LoginPage = () => {
           {/* Register link */}
           <p className="text-center text-sm text-gray-500 mt-8">
             Don&apos;t have an account?{' '}
-            <button onClick={() => router.push('/register')} className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors">Create one</button>
+            <button onClick={() => router.push('/register')} className="text-purple-400 hover:text-purple-300 font-medium transition-colors">Create one</button>
           </p>
         </motion.div>
       </div>

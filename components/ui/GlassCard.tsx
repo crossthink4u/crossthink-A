@@ -9,7 +9,7 @@ const GlassCard = ({ children, className, hover = true, glow = false, ...props }
     <motion.div
       className={cn(
         "glass-panel rounded-2xl p-6 relative overflow-hidden transition-all duration-300",
-        hover && "hover:shadow-xl hover:-translate-y-1 dark:hover:shadow-[0_8px_30px_rgba(0,240,255,0.1)]",
+        hover && "hover:shadow-xl hover:-translate-y-1 dark:hover:shadow-[0_8px_30px_rgba(168,85,247,0.12)]",
         className
       )}
       {...props}

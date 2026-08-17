@@ -6,11 +6,11 @@ import { ChevronLeft, ChevronRight, Video, Target, GraduationCap, Presentation, 
 import { useDashboard } from '@/context/DashboardContext';
 
 const eventStyles = {
-  meeting: { icon: Video, color: 'text-blue-400', dot: 'bg-blue-400' },
+  meeting: { icon: Video, color: 'text-violet-400', dot: 'bg-violet-400' },
   deadline: { icon: Target, color: 'text-red-400', dot: 'bg-red-400' },
   mentor: { icon: GraduationCap, color: 'text-amber-400', dot: 'bg-amber-400' },
   presentation: { icon: Presentation, color: 'text-purple-400', dot: 'bg-purple-400' },
-  sprint: { icon: Clock, color: 'text-cyan-400', dot: 'bg-cyan-400' },
+  sprint: { icon: Clock, color: 'text-purple-400', dot: 'bg-purple-400' },
 };
 
 const DAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
@@ -68,11 +68,11 @@ export default function CalendarEvents() {
               <div
                 key={day}
                 className={`relative flex items-center justify-center py-1.5 text-[11px] rounded-md transition-colors ${
-                  isToday ? 'bg-cyan-500/20 text-cyan-400 font-semibold' : 'text-gray-400 hover:bg-white/5'
+                  isToday ? 'bg-purple-500/20 text-purple-400 font-semibold' : 'text-gray-400 hover:bg-white/5'
                 }`}
               >
                 {day}
-                {hasEvent && <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-cyan-400" />}
+                {hasEvent && <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-purple-400" />}
               </div>
             );
           })}

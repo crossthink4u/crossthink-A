@@ -13,7 +13,7 @@ const AIMatchPage = () => {
   return (
     <div className="space-y-6 pb-20 relative">
       <div className="absolute inset-0 z-0 pointer-events-none opacity-20 dark:opacity-40">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-cyan-500/20 blur-[100px] rounded-full" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-500/20 blur-[100px] rounded-full" />
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/20 blur-[100px] rounded-full" />
       </div>
 
@@ -21,7 +21,7 @@ const AIMatchPage = () => {
         <motion.div
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-400 to-purple-600 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(0,240,255,0.4)]"
+          className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(168,85,247,0.4)]"
         >
           <BrainCircuit className="w-8 h-8 text-white" />
         </motion.div>
@@ -33,7 +33,7 @@ const AIMatchPage = () => {
 
       <div className="grid lg:grid-cols-3 gap-8 relative z-10">
         <div className="lg:col-span-1">
-          <GlassCard className="p-6 h-[400px] flex flex-col justify-center border-cyan-500/30 shadow-[0_0_20px_rgba(0,240,255,0.1)]">
+          <GlassCard className="p-6 h-[400px] flex flex-col justify-center border-purple-500/30 shadow-[0_0_20px_rgba(168,85,247,0.1)]">
             <h3 className="text-center font-bold text-gray-900 dark:text-white mb-2">Your Skill Topology</h3>
             <div className="flex-1 w-full relative">
               <ResponsiveContainer width="100%" height="100%">
@@ -41,7 +41,7 @@ const AIMatchPage = () => {
                   <PolarGrid stroke="rgba(255,255,255,0.1)" />
                   <PolarAngleAxis dataKey="subject" tick={{ fill: '#9ca3af', fontSize: 12 }} />
                   <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                  <Radar name="Skills" dataKey="A" stroke="#00f0ff" fill="#00f0ff" fillOpacity={0.3} />
+                  <Radar name="Skills" dataKey="A" stroke="#a855f7" fill="#a855f7" fillOpacity={0.3} />
                 </RadarChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#0a0a0a]/50 pointer-events-none" />
@@ -77,7 +77,7 @@ const AIMatchPage = () => {
                         strokeWidth="6"
                         fill="transparent"
                         strokeDasharray="226"
-                        className="text-cyan-400"
+                        className="text-purple-400"
                       />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center flex-col">
@@ -100,7 +100,7 @@ const AIMatchPage = () => {
 
                   <Button
                     variant="outline"
-                    className="border-cyan-500/50 text-cyan-600 dark:text-cyan-400"
+                    className="border-purple-500/50 text-purple-600 dark:text-purple-400"
                     type="button"
                     disabled={connected}
                     onClick={() => connectSynergy(rec.id)}

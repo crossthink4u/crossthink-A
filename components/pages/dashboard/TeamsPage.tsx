@@ -41,7 +41,7 @@ const TeamsPage = () => {
             <GlassCard className="p-6">
               <div className="flex justify-between items-start mb-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
                     {team.name.charAt(0)}
                   </div>
                   <div>
@@ -67,7 +67,7 @@ const TeamsPage = () => {
                     <span className="text-gray-900 dark:text-white font-bold">{team.progress}%</span>
                   </div>
                   <div className="h-2 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
-                    <div className="h-full bg-blue-500 transition-all" style={{ width: `${team.progress}%` }} />
+                    <div className="h-full bg-violet-500 transition-all" style={{ width: `${team.progress}%` }} />
                   </div>
                 </div>
                 {manageId === team.id && (
@@ -79,11 +79,11 @@ const TeamsPage = () => {
                       max={100}
                       value={team.progress}
                       onChange={(e) => setTeamProgress(team.id, Number(e.target.value))}
-                      className="w-full mt-2 accent-blue-600"
+                      className="w-full mt-2 accent-violet-600"
                     />
                     <div className="flex justify-between text-[11px] text-gray-500 mt-1">
                       <span>{team.members}/{team.capacity} members</span>
-                      <button type="button" className="text-blue-600 dark:text-cyan-400" onClick={() => onInvite(team.id)}>
+                      <button type="button" className="text-violet-600 dark:text-purple-400" onClick={() => onInvite(team.id)}>
                         Invite
                       </button>
                     </div>

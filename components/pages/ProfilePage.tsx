@@ -11,7 +11,7 @@ const HeatmapGrid = () => {
   const weeks = 20;
   const days = 7;
   const levels = [0, 1, 2, 3, 4];
-  const colors = ['bg-white/[0.03]', 'bg-cyan-500/20', 'bg-cyan-500/40', 'bg-cyan-500/60', 'bg-cyan-500/80'];
+  const colors = ['bg-white/[0.03]', 'bg-purple-500/20', 'bg-purple-500/40', 'bg-purple-500/60', 'bg-purple-500/80'];
   return (
     <div className="flex gap-[3px]">
       {Array.from({ length: weeks }).map((_, w) => (
@@ -54,7 +54,7 @@ const ProfilePage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
+        <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
       </div>
     );
   }
@@ -82,16 +82,16 @@ const ProfilePage = () => {
     : expertise;
 
   const timeline = [
-    { action: 'Joined CrossThink', time: 'Recently', icon: Star, color: 'text-cyan-400' },
+    { action: 'Joined CrossThink', time: 'Recently', icon: Star, color: 'text-purple-400' },
     { action: 'Profile created', time: 'Just now', icon: FolderOpen, color: 'text-purple-400' },
   ];
 
   return (
     <div className="min-h-screen bg-[#050505] text-white">
       {/* Banner */}
-      <div className="relative h-48 bg-gradient-to-r from-cyan-600/30 via-purple-600/30 to-blue-600/30 overflow-hidden">
+      <div className="relative h-48 bg-gradient-to-r from-purple-600/30 via-purple-600/30 to-violet-600/30 overflow-hidden">
         <div className="absolute inset-0 bg-[#050505]/40" />
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_center,_rgba(0,240,255,0.1),transparent_70%)]" />
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_center,_rgba(168,85,247,0.1),transparent_70%)]" />
         <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
           <button onClick={() => router.push('/feed')} className="flex items-center gap-2 text-sm text-gray-300 hover:text-white transition-colors px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-md">
             ← Feed
@@ -105,13 +105,13 @@ const ProfilePage = () => {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-10 pb-20">
         {/* Profile Header */}
         <div className="flex flex-col sm:flex-row items-start gap-5 mb-8">
-          <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="w-28 h-28 rounded-2xl bg-gradient-to-br from-cyan-400 to-purple-600 flex items-center justify-center text-4xl font-bold border-4 border-[#050505] shadow-xl flex-shrink-0">
+          <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="w-28 h-28 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-4xl font-bold border-4 border-[#050505] shadow-xl flex-shrink-0">
             {initials}
           </motion.div>
           <div className="flex-1 pt-4">
             <div className="flex items-center gap-3 mb-1">
               <h1 className="text-2xl font-display font-bold">{fullName}</h1>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${isStudent ? 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400' : 'bg-purple-500/10 border-purple-500/20 text-purple-400'}`}>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${isStudent ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' : 'bg-purple-500/10 border-purple-500/20 text-purple-400'}`}>
                 {isStudent ? 'Student' : 'Mentor'}
               </span>
             </div>
@@ -142,12 +142,12 @@ const ProfilePage = () => {
             {skills.length > 0 && (
               <div className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
                 <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                  <Star className="w-4 h-4 text-cyan-400" />
+                  <Star className="w-4 h-4 text-purple-400" />
                   {isStudent ? 'Skills & Interests' : 'Areas of Expertise'}
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {skills.map((skill, i) => (
-                    <span key={i} className="px-2.5 py-1 rounded-full text-xs font-medium bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">{skill}</span>
+                    <span key={i} className="px-2.5 py-1 rounded-full text-xs font-medium bg-purple-500/10 border border-purple-500/20 text-purple-400">{skill}</span>
                   ))}
                 </div>
               </div>
@@ -159,7 +159,7 @@ const ProfilePage = () => {
               <div className="overflow-x-auto"><HeatmapGrid /></div>
               <div className="flex items-center gap-2 mt-3 text-[10px] text-gray-500">
                 <span>Less</span>
-                {['bg-white/[0.03]', 'bg-cyan-500/20', 'bg-cyan-500/40', 'bg-cyan-500/60', 'bg-cyan-500/80'].map((c, i) => (
+                {['bg-white/[0.03]', 'bg-purple-500/20', 'bg-purple-500/40', 'bg-purple-500/60', 'bg-purple-500/80'].map((c, i) => (
                   <div key={i} className={`w-[10px] h-[10px] rounded-sm ${c}`} />
                 ))}
                 <span>More</span>
@@ -190,7 +190,7 @@ const ProfilePage = () => {
                 </div>
                 <div className="flex justify-between">
                   <span>Role</span>
-                  <span className={isStudent ? 'text-cyan-400' : 'text-purple-400'}>{isStudent ? 'Student' : 'Mentor'}</span>
+                  <span className={isStudent ? 'text-purple-400' : 'text-purple-400'}>{isStudent ? 'Student' : 'Mentor'}</span>
                 </div>
                 {isStudent && university && (
                   <div className="flex justify-between">
@@ -235,7 +235,7 @@ const ProfilePage = () => {
 
             {/* Feed CTA */}
             <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => router.push('/feed')}
-              className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-xl shadow-[0_0_25px_rgba(0,240,255,0.3)] hover:shadow-[0_0_40px_rgba(0,240,255,0.5)] transition-all text-sm flex items-center justify-center gap-2">
+              className="w-full py-3.5 bg-gradient-to-r from-purple-500 to-violet-600 text-white font-semibold rounded-xl shadow-[0_0_25px_rgba(168,85,247,0.3)] hover:shadow-[0_0_40px_rgba(168,85,247,0.5)] transition-all text-sm flex items-center justify-center gap-2">
               Go to Feed <ArrowRight className="w-4 h-4" />
             </motion.button>
           </div>

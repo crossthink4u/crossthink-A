@@ -71,7 +71,7 @@ const defaultSeedProjects = [
     match: 98,
     role: 'Frontend Engineer',
     tech: ['React', 'Python', 'TensorFlow'],
-    image: 'linear-gradient(135deg, #00f0ff 0%, #0055ff 100%)',
+    image: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)',
     tags: ['Computer Science', 'Engineering'],
     owner: 'Dr. Chen',
   },

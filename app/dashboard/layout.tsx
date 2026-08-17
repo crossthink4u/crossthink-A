@@ -66,7 +66,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search projects, teams, mentors…"
-              className="w-full bg-gray-100 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.06] rounded-lg pl-10 pr-4 py-2 text-sm outline-none focus:border-blue-500 dark:focus:border-cyan-500/40 dark:text-white placeholder:text-gray-400"
+              className="w-full bg-gray-100 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.06] rounded-lg pl-10 pr-4 py-2 text-sm outline-none focus:border-violet-500 dark:focus:border-purple-500/40 dark:text-white placeholder:text-gray-400"
             />
             {searchResults.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-1 rounded-xl border border-gray-200 dark:border-white/[0.08] bg-white dark:bg-[#0c0c14] shadow-xl z-50 overflow-hidden">
@@ -98,7 +98,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
           {/* Right side actions */}
           <button className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
             <Bell className="w-5 h-5" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-cyan-500 rounded-full" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-purple-500 rounded-full" />
           </button>
           <button
             onClick={toggleRightSidebar}

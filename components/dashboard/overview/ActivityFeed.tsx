@@ -18,8 +18,8 @@ function formatRelative(iso) {
 const iconMap = {
   check: { icon: CheckCircle2, color: 'text-green-500', bg: 'bg-green-500/10' },
   pr: { icon: GitPullRequest, color: 'text-purple-500', bg: 'bg-purple-500/10' },
-  users: { icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-  inbox: { icon: Inbox, color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
+  users: { icon: Users, color: 'text-violet-500', bg: 'bg-violet-500/10' },
+  inbox: { icon: Inbox, color: 'text-purple-500', bg: 'bg-purple-500/10' },
   spark: { icon: Sparkles, color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
   clock: { icon: Clock, color: 'text-amber-500', bg: 'bg-amber-500/10' },
 };

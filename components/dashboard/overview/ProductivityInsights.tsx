@@ -38,10 +38,10 @@ function AnimatedCounter({ value, suffix = '' }) {
 
 const metrics = [
   { key: 'tasksCompletedThisWeek', label: 'Tasks Done', icon: CheckSquare, color: 'text-green-400', suffix: '' },
-  { key: 'projectProgressIncrease', label: 'Progress ↑', icon: TrendingUp, color: 'text-cyan-400', suffix: '%' },
+  { key: 'projectProgressIncrease', label: 'Progress ↑', icon: TrendingUp, color: 'text-purple-400', suffix: '%' },
   { key: 'contributionStreak', label: 'Streak', icon: Flame, color: 'text-orange-400', suffix: 'd' },
   { key: 'collaborationScore', label: 'Collab Score', icon: Users, color: 'text-purple-400', suffix: '' },
-  { key: 'githubCommits', label: 'Commits', icon: GitCommit, color: 'text-blue-400', suffix: '' },
+  { key: 'githubCommits', label: 'Commits', icon: GitCommit, color: 'text-violet-400', suffix: '' },
   { key: 'activeHours', label: 'Active Hrs', icon: Clock, color: 'text-amber-400', suffix: 'h' },
 ];
 

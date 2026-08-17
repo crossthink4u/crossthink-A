@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-display: 'Outfit', system-ui, sans-serif;
+  --font-sans: 'Funnel Display', system-ui, sans-serif;
+  --font-display: 'Funnel Display', system-ui, sans-serif;
   
   --color-matte: #0a0a0a;
   --color-matte-light: #121212;
   --color-matte-dark: #050505;
   --color-navy: #0B192C;
   --color-navy-light: #1E3E62;
-  --color-cyan: #00f0ff;
-  --color-blue-electric: #0055ff;
+  --color-cyan: #a855f7;
+  --color-blue-electric: #7c3aed;
   --color-purple-glow: #8a2be2;
 }
 
@@ -23,12 +23,12 @@
   --text: #111827;
   --text-muted: #6b7280;
   --border: #e5e7eb;
-  --primary: #0055ff;
+  --primary: #7c3aed;
   --card-bg: rgba(255, 255, 255, 0.7);
   --card-border: rgba(255, 255, 255, 0.5);
   
   /* Gradients */
-  --glow-gradient: radial-gradient(circle at center, rgba(0, 85, 255, 0.15) 0%, transparent 70%);
+  --glow-gradient: radial-gradient(circle at center, rgba(124, 58, 237, 0.15) 0%, transparent 70%);
 }
 
 .dark {
@@ -37,11 +37,11 @@
   --text: #f9fafb;
   --text-muted: #9ca3af;
   --border: #262626;
-  --primary: #00f0ff;
+  --primary: #a855f7;
   --card-bg: rgba(18, 18, 18, 0.6);
   --card-border: rgba(255, 255, 255, 0.08);
   
-  --glow-gradient: radial-gradient(circle at center, rgba(138, 43, 226, 0.15) 0%, rgba(0, 240, 255, 0.05) 40%, transparent 70%);
+  --glow-gradient: radial-gradient(circle at center, rgba(138, 43, 226, 0.15) 0%, rgba(168, 85, 247, 0.05) 40%, transparent 70%);
 }
 
 body {
@@ -97,13 +97,13 @@ h1, h2, h3, h4, h5, h6 {
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-image: linear-gradient(to right, #00f0ff, #8a2be2);
+  background-image: linear-gradient(to right, #a855f7, #8a2be2);
 }
 .dark .text-gradient {
-  background-image: linear-gradient(to right, #00f0ff, #8a2be2, #0055ff);
+  background-image: linear-gradient(to right, #a855f7, #8a2be2, #7c3aed);
 }
 .light .text-gradient {
-  background-image: linear-gradient(to right, #0055ff, #8a2be2);
+  background-image: linear-gradient(to right, #7c3aed, #8a2be2);
 }
 
 /* Glow effects */
@@ -137,12 +137,12 @@ h1, h2, h3, h4, h5, h6 {
   animation: float 10s infinite ease-in-out alternate;
 }
 .dark .mesh-blob:nth-child(1) { background: rgba(138, 43, 226, 0.3); width: 400px; height: 400px; top: -100px; left: -100px; }
-.dark .mesh-blob:nth-child(2) { background: rgba(0, 240, 255, 0.2); width: 500px; height: 500px; bottom: -200px; right: -100px; animation-delay: -5s; }
-.dark .mesh-blob:nth-child(3) { background: rgba(0, 85, 255, 0.2); width: 300px; height: 300px; top: 30%; left: 40%; animation-delay: -2s; }
+.dark .mesh-blob:nth-child(2) { background: rgba(168, 85, 247, 0.2); width: 500px; height: 500px; bottom: -200px; right: -100px; animation-delay: -5s; }
+.dark .mesh-blob:nth-child(3) { background: rgba(124, 58, 237, 0.2); width: 300px; height: 300px; top: 30%; left: 40%; animation-delay: -2s; }
 
 .light .mesh-blob:nth-child(1) { background: rgba(138, 43, 226, 0.15); width: 400px; height: 400px; top: -100px; left: -100px; }
-.light .mesh-blob:nth-child(2) { background: rgba(0, 85, 255, 0.1); width: 500px; height: 500px; bottom: -200px; right: -100px; animation-delay: -5s; }
-.light .mesh-blob:nth-child(3) { background: rgba(0, 240, 255, 0.15); width: 300px; height: 300px; top: 30%; left: 40%; animation-delay: -2s; }
+.light .mesh-blob:nth-child(2) { background: rgba(124, 58, 237, 0.1); width: 500px; height: 500px; bottom: -200px; right: -100px; animation-delay: -5s; }
+.light .mesh-blob:nth-child(3) { background: rgba(168, 85, 247, 0.15); width: 300px; height: 300px; top: 30%; left: 40%; animation-delay: -2s; }
 
 @keyframes float {
   0% { transform: translate(0, 0) scale(1); }
@@ -230,8 +230,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Pulse glow for buttons/orbs */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(0, 240, 255, 0.3), 0 0 60px rgba(138, 43, 226, 0.1); }
-  50% { box-shadow: 0 0 40px rgba(0, 240, 255, 0.5), 0 0 100px rgba(138, 43, 226, 0.2); }
+  0%, 100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.3), 0 0 60px rgba(138, 43, 226, 0.1); }
+  50% { box-shadow: 0 0 40px rgba(168, 85, 247, 0.5), 0 0 100px rgba(138, 43, 226, 0.2); }
 }
 .pulse-glow {
   animation: pulse-glow 3s ease-in-out infinite;
@@ -264,7 +264,7 @@ h1, h2, h3, h4, h5, h6 {
   inset: -1px;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(0, 240, 255, 0.5), rgba(138, 43, 226, 0.5), rgba(0, 85, 255, 0.5));
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.5), rgba(138, 43, 226, 0.5), rgba(124, 58, 237, 0.5));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -290,8 +290,8 @@ h1, h2, h3, h4, h5, h6 {
   outline: none;
 }
 .auth-input:focus {
-  border-color: rgba(0, 240, 255, 0.5);
-  box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.1), 0 0 20px rgba(0, 240, 255, 0.05);
+  border-color: rgba(168, 85, 247, 0.5);
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1), 0 0 20px rgba(168, 85, 247, 0.05);
   background: rgba(255, 255, 255, 0.05);
 }
 .auth-input::placeholder {
@@ -307,13 +307,13 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 500;
-  background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(138, 43, 226, 0.15));
-  border: 1px solid rgba(0, 240, 255, 0.2);
-  color: #00f0ff;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(138, 43, 226, 0.15));
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  color: #a855f7;
   transition: all 0.2s ease;
 }
 .skill-tag:hover {
-  background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(138, 43, 226, 0.25));
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(138, 43, 226, 0.25));
 }
 
 /* Radar chart animation */
@@ -345,7 +345,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 .heatmap-cell:hover {
   transform: scale(1.5);
-  outline: 1px solid rgba(0, 240, 255, 0.5);
+  outline: 1px solid rgba(168, 85, 247, 0.5);
 }
 
 /* Animated gradient background for auth */

@@ -10,7 +10,7 @@ const tabs = ['overdue', 'today', 'upcoming'];
 function priorityStyle(p) {
   if (p === 'urgent') return { dot: 'bg-red-500', badge: 'bg-red-500/10 text-red-400', label: 'Urgent' };
   if (p === 'medium') return { dot: 'bg-amber-500', badge: 'bg-amber-500/10 text-amber-400', label: 'Medium' };
-  return { dot: 'bg-blue-500', badge: 'bg-blue-500/10 text-blue-400', label: 'Planned' };
+  return { dot: 'bg-violet-500', badge: 'bg-violet-500/10 text-violet-400', label: 'Planned' };
 }
 
 export default function TasksDeadlines() {
@@ -76,7 +76,7 @@ export default function TasksDeadlines() {
                   exit={{ opacity: 0, x: -20, height: 0 }}
                   className="group flex items-start gap-3 p-3 rounded-lg border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] transition-all"
                 >
-                  <button onClick={() => toggleTaskDone(task.id)} className="mt-0.5 shrink-0 text-gray-600 hover:text-cyan-400 transition-colors">
+                  <button onClick={() => toggleTaskDone(task.id)} className="mt-0.5 shrink-0 text-gray-600 hover:text-purple-400 transition-colors">
                     {task.status === 'done' ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Circle className="w-4 h-4" />}
                   </button>
                   <div className="flex-1 min-w-0">

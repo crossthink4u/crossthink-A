@@ -75,7 +75,7 @@ export default function RightSidebar() {
                 {item.type === 'repost' ? (
                   <Repeat2 className="w-4 h-4 text-emerald-400" />
                 ) : (
-                  <Heart className="w-4 h-4 text-blue-400" />
+                  <Heart className="w-4 h-4 text-violet-400" />
                 )}
               </div>
               <div className="flex-1 min-w-0">

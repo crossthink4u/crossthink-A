@@ -15,8 +15,8 @@ export default function LibraryPage() {
         transition={{ duration: 0.5 }}
         className="max-w-md w-full text-center"
       >
-        <div className="w-20 h-20 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mx-auto mb-6">
-          <Bookmark className="w-10 h-10 text-cyan-400" />
+        <div className="w-20 h-20 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-6">
+          <Bookmark className="w-10 h-10 text-purple-400" />
         </div>
         <div className="flex items-center justify-center gap-2 mb-3">
           <Construction className="w-5 h-5 text-amber-400" />

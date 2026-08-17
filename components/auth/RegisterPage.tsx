@@ -50,7 +50,7 @@ function passwordStrength(pw: string): { score: number; label: string; color: st
   return { score, label: 'Strong', color: 'bg-emerald-400' };
 }
 
-const inputCls = 'w-full bg-white/[0.04] border border-white/[0.10] rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500/40 transition-all';
+const inputCls = 'w-full bg-white/[0.04] border border-white/[0.10] rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/40 transition-all';
 
 const RegisterForm = () => {
   const router = useRouter();
@@ -184,7 +184,7 @@ const RegisterForm = () => {
   return (
     <div className="min-h-screen bg-[#050505] flex items-start justify-center py-12 px-4 relative overflow-hidden">
       {/* Ambient glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-cyan-500/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-purple-500/5 rounded-full blur-[120px] pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, y: 16 }}
@@ -197,9 +197,9 @@ const RegisterForm = () => {
           className="flex items-center justify-center gap-2 mb-8 cursor-pointer"
           onClick={() => router.push('/')}
         >
-          <Hexagon className="w-7 h-7 text-cyan-400" fill="currentColor" fillOpacity={0.15} />
+          <Hexagon className="w-7 h-7 text-purple-400" fill="currentColor" fillOpacity={0.15} />
           <span className="font-display font-bold text-xl text-white">
-            Cross<span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">Think</span>
+            Cross<span className="bg-gradient-to-r from-purple-400 to-violet-500 bg-clip-text text-transparent">Think</span><span className="font-normal text-gray-500">: by Iris</span>
           </span>
         </div>
 
@@ -222,7 +222,7 @@ const RegisterForm = () => {
                   <div
                     key={s}
                     className={`h-1.5 rounded-full transition-all duration-300 ${
-                      s === step ? 'w-5 bg-cyan-400' : s < step ? 'w-1.5 bg-cyan-400/40' : 'w-1.5 bg-white/[0.12]'
+                      s === step ? 'w-5 bg-purple-400' : s < step ? 'w-1.5 bg-purple-400/40' : 'w-1.5 bg-white/[0.12]'
                     }`}
                   />
                 ))}
@@ -395,7 +395,7 @@ const RegisterForm = () => {
                   <button
                     type="button"
                     onClick={handleStep1}
-                    className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-xl text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity mt-2"
+                    className="w-full py-3 bg-gradient-to-r from-purple-500 to-violet-600 text-white font-semibold rounded-xl text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity mt-2"
                   >
                     Continue
                     <ArrowRight className="w-4 h-4" />
@@ -490,7 +490,7 @@ const RegisterForm = () => {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-xl text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50"
+                      className="flex-1 py-3 bg-gradient-to-r from-purple-500 to-violet-600 text-white font-semibold rounded-xl text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50"
                     >
                       {loading ? (
                         <>
@@ -520,7 +520,7 @@ const RegisterForm = () => {
               Already have an account?{' '}
               <button
                 onClick={() => router.push('/login')}
-                className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
+                className="text-purple-400 hover:text-purple-300 font-medium transition-colors"
               >
                 Sign in
               </button>

@@ -17,7 +17,7 @@ export default function ActiveProjects() {
         </div>
         <p className="text-white font-semibold mb-1">No active projects yet</p>
         <p className="text-sm text-gray-500 mb-4">Start building something amazing with your team.</p>
-        <button onClick={() => router.push('/dashboard/projects')} className="px-4 py-2 rounded-lg bg-cyan-500/10 text-cyan-400 text-sm font-medium hover:bg-cyan-500/20 transition-colors">
+        <button onClick={() => router.push('/dashboard/projects')} className="px-4 py-2 rounded-lg bg-purple-500/10 text-purple-400 text-sm font-medium hover:bg-purple-500/20 transition-colors">
           Find Your First Project
         </button>
       </div>
@@ -28,7 +28,7 @@ export default function ActiveProjects() {
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.15 }}>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-base font-semibold text-white">Active Projects</h2>
-        <button onClick={() => router.push('/dashboard/projects')} className="text-xs text-gray-500 hover:text-cyan-400 transition-colors flex items-center gap-1">
+        <button onClick={() => router.push('/dashboard/projects')} className="text-xs text-gray-500 hover:text-purple-400 transition-colors flex items-center gap-1">
           View All <ArrowRight className="w-3 h-3" />
         </button>
       </div>
@@ -48,7 +48,7 @@ export default function ActiveProjects() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
                   <h3 className="text-sm font-semibold text-white truncate">{p.title}</h3>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 font-medium shrink-0 ml-2">
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 font-medium shrink-0 ml-2">
                     {p.currentSprint}
                   </span>
                 </div>
@@ -65,7 +65,7 @@ export default function ActiveProjects() {
                       initial={{ width: 0 }}
                       animate={{ width: `${p.progress}%` }}
                       transition={{ duration: 0.8, delay: 0.3 + i * 0.1 }}
-                      className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500"
+                      className="h-full rounded-full bg-gradient-to-r from-purple-500 to-violet-500"
                     />
                   </div>
                 </div>
@@ -102,7 +102,7 @@ export default function ActiveProjects() {
             {/* Latest activity */}
             <div className="mt-3 pt-3 border-t border-white/[0.04] text-[10px] text-gray-500 flex items-center justify-between">
               <span>Latest: {p.latestActivity}</span>
-              <span className="opacity-0 group-hover:opacity-100 transition-opacity text-cyan-400 flex items-center gap-1">
+              <span className="opacity-0 group-hover:opacity-100 transition-opacity text-purple-400 flex items-center gap-1">
                 Open <ArrowRight className="w-2.5 h-2.5" />
               </span>
             </div>

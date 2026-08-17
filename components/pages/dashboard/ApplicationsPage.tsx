@@ -70,7 +70,7 @@ const ApplicationsPage = () => {
                   <td className="p-4 text-right">
                     <button
                       type="button"
-                      className="p-2 text-gray-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50 dark:hover:bg-white/5"
+                      className="p-2 text-gray-400 hover:text-violet-600 transition-colors rounded-lg hover:bg-violet-50 dark:hover:bg-white/5"
                       aria-label="Open related project"
                       onClick={() => openProject(app)}
                     >

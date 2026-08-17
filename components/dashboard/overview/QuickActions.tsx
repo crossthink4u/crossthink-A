@@ -5,11 +5,11 @@ import { useRouter } from 'next/navigation';
 import { Plus, Users, GraduationCap, SquareKanban, FolderSearch, Sparkles } from 'lucide-react';
 
 const actions = [
-  { label: 'Create Project', icon: Plus, color: 'from-cyan-500 to-blue-600', path: '/dashboard/projects', state: { openCreate: true } },
+  { label: 'Create Project', icon: Plus, color: 'from-purple-500 to-violet-600', path: '/dashboard/projects', state: { openCreate: true } },
   { label: 'Find Teammates', icon: Users, color: 'from-purple-500 to-pink-500', path: '/dashboard/teams' },
   { label: 'Request Mentor', icon: GraduationCap, color: 'from-amber-500 to-orange-500', path: '/dashboard/mentors' },
   { label: 'Open Workspace', icon: SquareKanban, color: 'from-green-500 to-emerald-500', path: '/dashboard/workspace' },
-  { label: 'Browse Projects', icon: FolderSearch, color: 'from-blue-500 to-indigo-500', path: '/dashboard/projects' },
+  { label: 'Browse Projects', icon: FolderSearch, color: 'from-violet-500 to-indigo-500', path: '/dashboard/projects' },
   { label: 'AI Match', icon: Sparkles, color: 'from-rose-500 to-purple-500', path: '/dashboard/ai-match' },
 ];
 

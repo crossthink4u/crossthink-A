@@ -31,11 +31,11 @@ export default function Sidebar({ collapsed, onToggle }: { collapsed: boolean; o
       {/* Logo */}
       <div className="h-16 flex items-center px-4 gap-3 border-b border-gray-200 dark:border-white/[0.06] flex-shrink-0">
         <div className="flex-shrink-0">
-          <Hexagon className="w-8 h-8 text-blue-600 dark:text-cyan-400" fill="currentColor" fillOpacity={0.2} />
+          <Hexagon className="w-8 h-8 text-violet-600 dark:text-purple-400" fill="currentColor" fillOpacity={0.2} />
         </div>
         {!collapsed && (
           <span className="font-display font-bold text-lg tracking-tight whitespace-nowrap">
-            Cross<span className="text-gradient">Think</span>
+            Cross<span className="text-gradient">Think</span><span className="font-normal text-gray-500">: by Iris</span>
           </span>
         )}
       </div>
@@ -50,7 +50,7 @@ export default function Sidebar({ collapsed, onToggle }: { collapsed: boolean; o
               href={item.href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${
                 isActive
-                  ? 'bg-blue-50 dark:bg-white/[0.08] text-blue-600 dark:text-cyan-400 font-medium'
+                  ? 'bg-violet-50 dark:bg-white/[0.08] text-violet-600 dark:text-purple-400 font-medium'
                   : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.04] hover:text-gray-900 dark:hover:text-white'
               }`}
             >

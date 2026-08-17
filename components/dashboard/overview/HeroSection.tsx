@@ -34,14 +34,14 @@ export default function HeroSection() {
     >
       {/* Glow */}
       <div className="absolute -top-24 -right-24 w-72 h-72 bg-purple-600/20 blur-[100px] rounded-full pointer-events-none" style={{ animation: 'hero-glow 6s ease-in-out infinite' }} />
-      <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-cyan-500/15 blur-[80px] rounded-full pointer-events-none" style={{ animation: 'hero-glow 8s ease-in-out infinite 2s' }} />
+      <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-purple-500/15 blur-[80px] rounded-full pointer-events-none" style={{ animation: 'hero-glow 8s ease-in-out infinite 2s' }} />
 
       <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         {/* Left */}
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">
             {greeting},{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-400">
               {user.firstName}
             </span>
           </h1>
@@ -55,7 +55,7 @@ export default function HeroSection() {
               { label: 'Streak', value: `${productivity.contributionStreak}d`, icon: <Zap className="w-3.5 h-3.5" /> },
             ].map((s) => (
               <div key={s.label} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.06]">
-                <span className="text-cyan-400">{s.icon}</span>
+                <span className="text-purple-400">{s.icon}</span>
                 <span className="text-white font-semibold text-sm">{s.value}</span>
                 <span className="text-gray-500 text-xs">{s.label}</span>
               </div>
@@ -72,7 +72,7 @@ export default function HeroSection() {
           <div className="flex flex-wrap gap-3">
             <button
               onClick={() => router.push('/dashboard/workspace')}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-medium hover:shadow-[0_0_20px_rgba(0,200,255,0.3)] transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-violet-600 text-white text-sm font-medium hover:shadow-[0_0_20px_rgba(0,200,255,0.3)] transition-all"
             >
               Continue Working <ArrowRight className="w-3.5 h-3.5" />
             </button>
@@ -110,7 +110,7 @@ export default function HeroSection() {
                   initial={{ width: 0 }}
                   animate={{ width: `${focusProject.progress}%` }}
                   transition={{ duration: 1, delay: 0.5 }}
-                  className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500"
+                  className="h-full rounded-full bg-gradient-to-r from-purple-500 to-violet-500"
                 />
               </div>
             </div>

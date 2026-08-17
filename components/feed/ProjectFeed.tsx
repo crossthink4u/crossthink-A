@@ -1,30 +1,24 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Search, Plus, Users, Clock, ArrowRight, Zap, X, Hexagon,
+  Search, Plus, Clock, ArrowRight, Zap, Hexagon,
   FolderOpen, Sparkles, User as UserIcon, LogOut, ExternalLink,
-  Loader2, Upload,
+  Loader2,
 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
-import { type Project } from '@/data/projects';
 import type { User } from '@supabase/supabase-js';
 import type { DbProject } from '@/types/database';
 
 // ─── accent helpers ──────────────────────────────────────────────────────────
 
-const ACCENT_COLORS: Record<string, string> = {
-  cyan: '#00f0ff', emerald: '#10b981', amber: '#f59e0b',
-  violet: '#8b5cf6', pink: '#ec4899', sky: '#0ea5e9',
-};
-
 // ─── Discover card ───────────────────────────────────────────────────────────
 function DiscoverCard({ project, index }: { project: DbProject; index: number }) {
   const router = useRouter();
   const openCount = project.open_roles.reduce((s, r) => s + r.count, 0);
-  const accentHex = '#00f0ff';
+  const accentHex = '#a855f7';
 
   return (
     <motion.div
@@ -81,7 +75,7 @@ function MyProjectCard({ project, onWorkspace }: { project: DbProject; onWorkspa
     <motion.div
       initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col rounded-xl bg-[#0d0d0d] border border-cyan-500/20 hover:border-cyan-500/35 transition-all duration-200 p-4 gap-3"
+      className="flex flex-col rounded-xl bg-[#0d0d0d] border border-purple-500/20 hover:border-purple-500/35 transition-all duration-200 p-4 gap-3"
     >
       {project.image_url && (
         <div className="h-28 rounded-lg overflow-hidden -mx-0">
@@ -93,7 +87,7 @@ function MyProjectCard({ project, onWorkspace }: { project: DbProject; onWorkspa
           <p className="text-[10px] font-medium text-gray-600 uppercase tracking-wider mb-0.5">{project.dept || 'Project'}</p>
           <h3 className="font-display font-semibold text-sm text-white leading-snug truncate">{project.title}</h3>
         </div>
-        <span className="flex-shrink-0 text-[10px] font-semibold px-2 py-1 rounded-md bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Owner</span>
+        <span className="flex-shrink-0 text-[10px] font-semibold px-2 py-1 rounded-md bg-purple-500/10 text-purple-400 border border-purple-500/20">Owner</span>
       </div>
       {project.tech.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
@@ -114,166 +108,6 @@ function MyProjectCard({ project, onWorkspace }: { project: DbProject; onWorkspa
     </motion.div>
   );
 }
-
-// ─── Create project modal ─────────────────────────────────────────────────────
-
-function CreateModal({
-  onClose,
-  onCreate,
-}: {
-  onClose: () => void;
-  onCreate: (p: DbProject) => void;
-}) {
-  const supabase = createClient();
-  const [form, setForm] = useState({ title: '', dept: '', description: '', tech: '', duration: '', deadline: '' });
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
-  };
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.title.trim() || !form.dept.trim()) return;
-    setLoading(true);
-    setError('');
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setError('You must be signed in.'); setLoading(false); return; }
-
-    let imageUrl: string | null = null;
-
-    if (imageFile) {
-      const ext = imageFile.name.split('.').pop();
-      const path = `${user.id}/${Date.now()}.${ext}`;
-      const { error: uploadErr } = await supabase.storage
-        .from('project-images')
-        .upload(path, imageFile, { upsert: true });
-
-      if (!uploadErr) {
-        const { data: urlData } = supabase.storage.from('project-images').getPublicUrl(path);
-        imageUrl = urlData.publicUrl;
-      }
-    }
-
-    const techArr = form.tech.split(',').map((t) => t.trim()).filter(Boolean);
-
-    const { data, error: insertErr } = await supabase
-      .from('projects')
-      .insert({
-        owner_id: user.id,
-        title: form.title.trim(),
-        dept: form.dept.trim(),
-        description: form.description.trim() || null,
-        tech: techArr,
-        image_url: imageUrl,
-        duration: form.duration.trim() || null,
-        deadline: form.deadline.trim() || null,
-        is_public: true,
-      })
-      .select()
-      .single();
-
-    setLoading(false);
-
-    if (insertErr || !data) {
-      setError(insertErr?.message ?? 'Failed to create project.');
-      return;
-    }
-
-    onCreate(data as DbProject);
-    onClose();
-  };
-
-  const field = (label: string, key: keyof typeof form, opts?: { placeholder?: string; required?: boolean; textarea?: boolean }) => (
-    <div>
-      <label className="text-xs font-medium text-gray-400 mb-1.5 block">{label}</label>
-      {opts?.textarea ? (
-        <textarea
-          rows={2}
-          required={opts.required}
-          placeholder={opts.placeholder}
-          value={form[key]}
-          onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
-          className="w-full bg-white/[0.04] border border-white/[0.10] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500/40 transition-all resize-none"
-        />
-      ) : (
-        <input
-          required={opts?.required}
-          placeholder={opts?.placeholder}
-          value={form[key]}
-          onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
-          className="w-full bg-white/[0.04] border border-white/[0.10] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500/40 transition-all"
-        />
-      )}
-    </div>
-  );
-
-  return (
-    <motion.div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.96, opacity: 0 }}
-        className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0a0a0a] shadow-2xl p-6 max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-5">
-          <h2 className="text-base font-bold text-white">Post a Project</h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-gray-400 hover:text-white transition-colors">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        <form className="space-y-4" onSubmit={submit}>
-          {/* Image upload */}
-          <div>
-            <label className="text-xs font-medium text-gray-400 mb-1.5 block">Cover Image (optional)</label>
-            <input ref={fileRef} type="file" accept="image/*" onChange={handleImage} className="hidden" />
-            {imagePreview ? (
-              <div className="relative h-32 rounded-xl overflow-hidden group cursor-pointer" onClick={() => fileRef.current?.click()}>
-                <img src={imagePreview} alt="" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <span className="text-xs text-white font-medium">Change image</span>
-                </div>
-              </div>
-            ) : (
-              <button type="button" onClick={() => fileRef.current?.click()}
-                className="w-full h-24 rounded-xl border-2 border-dashed border-white/[0.10] hover:border-white/[0.20] flex flex-col items-center justify-center gap-2 text-gray-600 hover:text-gray-400 transition-all">
-                <Upload className="w-5 h-5" />
-                <span className="text-xs">Upload cover image</span>
-              </button>
-            )}
-          </div>
-
-          {field('Project Title', 'title', { required: true, placeholder: 'e.g. AI Resume Analyzer' })}
-          {field('Department / Focus Area', 'dept', { required: true, placeholder: 'e.g. Computer Science' })}
-          {field('Description', 'description', { placeholder: 'What is this project about?', textarea: true })}
-          {field('Tech Stack (comma-separated)', 'tech', { placeholder: 'React, Python, PostgreSQL…' })}
-          {field('Duration', 'duration', { placeholder: 'e.g. 3 months' })}
-          {field('Deadline', 'deadline', { placeholder: 'e.g. June 30, 2025' })}
-
-          {error && <p className="text-xs text-rose-400">{error}</p>}
-
-          <div className="flex gap-2 pt-1">
-            <button type="button" onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl border border-white/[0.10] text-sm text-gray-400 hover:text-white hover:bg-white/[0.05] transition-all">
-              Cancel
-            </button>
-            <button type="submit" disabled={loading}
-              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2">
-              {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</> : 'Publish'}
-            </button>
-          </div>
-        </form>
-      </motion.div>
-    </motion.div>
-  );
-}
-
 // ─── Main Feed ────────────────────────────────────────────────────────────────
 
 export default function ProjectFeed() {
@@ -285,7 +119,6 @@ export default function ProjectFeed() {
   const [projectsError, setProjectsError] = useState<string | null>(null);
   const [publicProjects, setPublicProjects] = useState<DbProject[]>([]);
   const [search, setSearch] = useState('');
-  const [createOpen, setCreateOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const loadMyProjects = async (uid: string) => {
@@ -386,10 +219,10 @@ const filteredPublic = publicProjects.filter((p) => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
           <button onClick={() => router.push('/')} className="flex items-center gap-2 group flex-shrink-0">
             <motion.div whileHover={{ rotate: 120 }} transition={{ duration: 0.4 }}>
-              <Hexagon className="w-6 h-6 text-cyan-400" fill="currentColor" fillOpacity={0.12} />
+              <Hexagon className="w-6 h-6 text-purple-400" fill="currentColor" fillOpacity={0.12} />
             </motion.div>
             <span className="font-display font-bold text-base text-white">
-              Cross<span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">Think</span>
+              Cross<span className="bg-gradient-to-r from-purple-400 to-violet-500 bg-clip-text text-transparent">Think</span><span className="font-normal text-gray-500">: by Iris</span>
             </span>
           </button>
 
@@ -400,8 +233,8 @@ const filteredPublic = publicProjects.filter((p) => {
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
-            <button onClick={() => setCreateOpen(true)}
-              className="flex items-center gap-1.5 text-sm font-semibold text-white bg-gradient-to-r from-cyan-500 to-blue-600 px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity">
+            <button onClick={() => router.push('/projects/new')}
+              className="flex items-center gap-1.5 text-sm font-semibold text-white bg-gradient-to-r from-purple-500 to-violet-600 px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity">
               <Plus className="w-4 h-4" /> Post Project
             </button>
 
@@ -448,7 +281,7 @@ const filteredPublic = publicProjects.filter((p) => {
               <h2 className="text-xl font-display font-bold text-white">Hey {firstName} — Your Projects</h2>
               <p className="text-xs text-gray-500 mt-0.5">Projects you&apos;ve posted on CrossThink</p>
             </div>
-            <button onClick={() => setCreateOpen(true)}
+            <button onClick={() => router.push('/projects/new')}
               className="flex items-center gap-1.5 text-xs font-semibold text-white border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] px-3 py-2 rounded-lg transition-all">
               <Plus className="w-3.5 h-3.5" /> New Project
             </button>
@@ -456,7 +289,7 @@ const filteredPublic = publicProjects.filter((p) => {
 
           {projectsLoading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-6 h-6 text-cyan-400 animate-spin" />
+              <Loader2 className="w-6 h-6 text-purple-400 animate-spin" />
             </div>
           ) : projectsError ? (
             <div className="flex flex-col items-center justify-center py-14 rounded-2xl border border-rose-500/20 bg-rose-500/[0.03] text-center">
@@ -469,8 +302,8 @@ const filteredPublic = publicProjects.filter((p) => {
               <FolderOpen className="w-10 h-10 text-gray-700 mb-3" />
               <p className="text-sm font-medium text-gray-400 mb-1">No projects yet</p>
               <p className="text-xs text-gray-600 mb-5 max-w-xs">Post your first project and start finding collaborators.</p>
-              <button onClick={() => setCreateOpen(true)}
-                className="flex items-center gap-2 text-sm font-semibold text-white bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(0,240,255,0.2)]">
+              <button onClick={() => router.push('/projects/new')}
+                className="flex items-center gap-2 text-sm font-semibold text-white bg-gradient-to-r from-purple-500 to-violet-600 px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(168,85,247,0.2)]">
                 <Sparkles className="w-4 h-4" /> Post a Project
               </button>
             </motion.div>
@@ -497,7 +330,7 @@ const filteredPublic = publicProjects.filter((p) => {
               <div className="flex items-center justify-between mb-5">
                 <div>
                   <h2 className="text-xl font-display font-bold text-white flex items-center gap-2">
-                    Discover Projects <Sparkles className="w-4 h-4 text-cyan-400" />
+                    Discover Projects <Sparkles className="w-4 h-4 text-purple-400" />
                   </h2>
                   <p className="text-xs text-gray-500 mt-0.5">
 
@@ -526,7 +359,7 @@ const filteredPublic = publicProjects.filter((p) => {
               ) : (
                 <div className="text-center py-12">
                   <p className="text-gray-600 text-sm mb-2">No projects match your search.</p>
-                  <button onClick={() => setSearch('')} className="text-sm text-cyan-500 hover:text-cyan-400 transition-colors">Clear search</button>
+                  <button onClick={() => setSearch('')} className="text-sm text-purple-500 hover:text-purple-400 transition-colors">Clear search</button>
                 </div>
               )}
             </>
@@ -534,14 +367,6 @@ const filteredPublic = publicProjects.filter((p) => {
         </section>
       </div>
 
-      <AnimatePresence>
-        {createOpen && (
-          <CreateModal
-            onClose={() => setCreateOpen(false)}
-            onCreate={(p) => setMyProjects((prev) => [p, ...prev])}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 }

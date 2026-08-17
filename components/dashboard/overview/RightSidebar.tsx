@@ -80,9 +80,9 @@ export default function RightSidebar() {
                     onChange={(e) => setNoteInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleAddNote()}
                     placeholder="Add a note..."
-                    className="flex-1 text-xs bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-white placeholder-gray-600 outline-none focus:border-cyan-500/30"
+                    className="flex-1 text-xs bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-white placeholder-gray-600 outline-none focus:border-purple-500/30"
                   />
-                  <button onClick={handleAddNote} className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-colors">
+                  <button onClick={handleAddNote} className="p-2 rounded-lg bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 transition-colors">
                     <Plus className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -101,7 +101,7 @@ export default function RightSidebar() {
               {/* Notifications */}
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <Bell className="w-3.5 h-3.5 text-blue-400" />
+                  <Bell className="w-3.5 h-3.5 text-violet-400" />
                   <span className="text-xs font-medium text-gray-400">Notifications</span>
                 </div>
                 <div className="space-y-2">
