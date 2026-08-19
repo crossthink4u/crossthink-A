@@ -37,6 +37,16 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
+  // Safety net: an OAuth/magic-link code can land on any path when Supabase falls
+  // back to its configured Site URL instead of our redirectTo. Route it to the
+  // handler that actually exchanges it, so the user still ends up signed in.
+  if (pathname !== '/auth/callback' && request.nextUrl.searchParams.has('code')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/auth/callback'
+    if (pathname !== '/') url.searchParams.set('next', pathname)
+    return NextResponse.redirect(url)
+  }
+
   // Redirect logged-in users away from auth pages to the feed
   if (user) {
     if (

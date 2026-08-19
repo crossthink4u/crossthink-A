@@ -240,6 +240,8 @@ export default function WorkspaceView({ projectId }: { projectId: string }) {
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const coverRef = useRef<HTMLInputElement>(null);
 
   const loadApplications = useCallback(async () => {
@@ -390,6 +392,24 @@ export default function WorkspaceView({ projectId }: { projectId: string }) {
     setProject(form);
     setSaveMsg('Saved');
     setTimeout(() => setSaveMsg(null), 2500);
+  };
+
+  const deleteProject = async () => {
+    setDeleting(true);
+    setSaveMsg(null);
+
+    // applications carry project_id as plain text with no FK, so nothing cascades
+    // them — clear them first (needs the owner-delete policy from the migration).
+    await supabase.from('applications').delete().eq('project_id', projectId);
+
+    const { error } = await supabase.from('projects').delete().eq('id', projectId);
+    if (error) {
+      setDeleting(false);
+      setConfirmDelete(false);
+      setSaveMsg(error.message);
+      return;
+    }
+    router.push('/feed');
   };
 
   const patch = (p: Partial<DbProject>) => setForm((f) => (f ? { ...f, ...p } : f));
@@ -670,6 +690,36 @@ export default function WorkspaceView({ projectId }: { projectId: string }) {
                 </span>
               </label>
             </Section>
+
+            {/* Danger zone */}
+            {isOwner && (
+              <section className="rounded-2xl border border-rose-500/20 bg-rose-500/[0.03] p-5">
+                <h3 className="text-sm font-semibold text-white mb-0.5">Delete this project</h3>
+                <p className="text-xs text-gray-500 mb-4">
+                  Removes the listing from the site along with its applications and team. This can&apos;t be undone.
+                </p>
+
+                {confirmDelete ? (
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="text-xs text-rose-300">Delete &ldquo;{project.title}&rdquo; permanently?</span>
+                    <button type="button" onClick={deleteProject} disabled={deleting}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-white bg-rose-600 hover:bg-rose-500 disabled:opacity-50 transition-colors">
+                      {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                      Yes, delete it
+                    </button>
+                    <button type="button" onClick={() => setConfirmDelete(false)} disabled={deleting}
+                      className="px-4 py-2 rounded-lg text-xs font-medium text-gray-400 hover:text-white transition-colors">
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button type="button" onClick={() => setConfirmDelete(true)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-rose-400 border border-rose-500/25 hover:bg-rose-500/10 transition-colors">
+                    <Trash2 className="w-3.5 h-3.5" /> Delete project
+                  </button>
+                )}
+              </section>
+            )}
 
             {isOwner && (
               <div className="sticky bottom-0 -mx-4 sm:-mx-6 px-4 sm:px-6 py-4 bg-[#080808]/90 backdrop-blur-xl border-t border-white/[0.06] flex items-center gap-3">
