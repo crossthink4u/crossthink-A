@@ -89,7 +89,7 @@ function DbProjectCard({ project, index }: { project: DbProject; index: number }
       {/* Cover */}
       <div className="relative h-40 w-full overflow-hidden flex-shrink-0 bg-[#0a0a0a]">
         {project.image_url ? (
-          <img src={project.image_url} alt=""
+          <img src={project.image_url} alt={`${project.title} project cover image`}
             className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-out" />
         ) : (
           <div className="w-full h-full grid place-items-center bg-[radial-gradient(130%_130%_at_25%_0%,var(--accent)_0%,transparent_60%)] opacity-25">
