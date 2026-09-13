@@ -375,6 +375,7 @@ export default function ProjectsPage() {
                   <button
                     key={cat.name}
                     onClick={() => setCategory(cat.name)}
+                    aria-pressed={isActive}
                     className={`flex items-center gap-1.5 flex-shrink-0 text-[13px] font-medium px-3 py-1.5 rounded-lg border transition-all duration-200 ${
                       isActive
                         ? 'bg-[#0a0a1a] text-white border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.15)]'
