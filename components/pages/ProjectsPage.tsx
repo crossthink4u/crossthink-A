@@ -349,13 +349,18 @@ export default function ProjectsPage() {
 
         {/* Mobile search */}
         <div className="sm:hidden mb-4 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search projects, tech..."
-            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-8 pr-3 py-2 text-sm text-white placeholder-gray-600 outline-none focus:border-white/[0.16] transition-colors"
+            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-9 pr-8 py-2.5 text-sm text-white placeholder-gray-600 outline-none focus:border-white/[0.16] transition-colors min-h-[44px]"
           />
+          {search && (
+            <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-400 p-1" aria-label="Clear search">
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
         {/* Community projects from DB */}
@@ -367,7 +372,7 @@ export default function ProjectsPage() {
         ) : (
           <>
             {/* Category filters */}
-            <div className="flex items-center gap-2 mb-5 overflow-x-auto pb-1 scrollbar-hide">
+            <div className="flex items-center gap-2 mb-5 overflow-x-auto pb-1 scrollbar-hide scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent overscroll-x-contain" role="tablist" aria-label="Filter projects by category">
               {CATEGORY_TABS.map((cat) => {
                 const Icon = cat.icon;
                 const isActive = category === cat.name;
@@ -376,6 +381,7 @@ export default function ProjectsPage() {
                     key={cat.name}
                     onClick={() => setCategory(cat.name)}
                     aria-pressed={isActive}
+                    aria-label={`Filter projects by ${cat.name}`}
                     className={`flex items-center gap-1.5 flex-shrink-0 text-[13px] font-medium px-3 py-1.5 rounded-lg border transition-all duration-200 ${
                       isActive
                         ? 'bg-[#0a0a1a] text-white border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.15)]'
@@ -387,13 +393,19 @@ export default function ProjectsPage() {
                   </button>
                 );
               })}
-              <span className="ml-auto flex-shrink-0 text-[11px] text-gray-600 pl-3">
+              <span className="ml-auto flex-shrink-0 text-[11px] text-gray-600 pl-3 whitespace-nowrap">
                 {filteredDb.length} {filteredDb.length === 1 ? 'project' : 'projects'}
               </span>
             </div>
 
             <div className="mb-10">
-              {filteredDb.length > 0 ? (
+              {dbProjects.length === 0 && !dbError ? (
+                <div className="flex flex-col items-center justify-center py-20 rounded-2xl border border-dashed border-white/[0.08] text-center">
+                  <Sparkles className="w-7 h-7 text-white/15 mb-3" />
+                  <p className="text-sm font-medium text-gray-400 mb-1">Loading projects...</p>
+                  <p className="text-xs text-gray-600">Fetching from database</p>
+                </div>
+              ) : filteredDb.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   <AnimatePresence>
                     {filteredDb.map((p, i) => (
