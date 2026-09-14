@@ -1,0 +1,6 @@
+{
+  "name": "CrossThink",
+  "description": "CrossThink connects students, faculty, and innovators into one collaborative ecosystem to browse open student projects and find teams.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

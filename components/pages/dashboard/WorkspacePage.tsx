@@ -1,0 +1,280 @@
+'use client';
+
+import { useState } from 'react';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { MoreHorizontal, Plus, MessageSquare, Paperclip, X, Layout, MessageCircle, FileText, Users } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import GlassCard from '@/components/ui/GlassCard';
+import Button from '@/components/ui/Button';
+import { useDashboard } from '@/context/DashboardContext';
+
+const PriorityBadge = ({ priority }) => {
+  const colors = {
+    High: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+    Medium: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+    Low: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  };
+  return <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${colors[priority]}`}>{priority}</span>;
+};
+
+const WorkspacePage = () => {
+  const { workspace, setWorkspaceBoard, addWorkspaceTask } = useDashboard();
+  const [addForColumn, setAddForColumn] = useState(null);
+  const [draft, setDraft] = useState({ content: '', priority: 'Medium' });
+  const [activeTab, setActiveTab] = useState('board');
+
+  const tabs = [
+    { id: 'board', label: 'Kanban Board', icon: Layout },
+    { id: 'chat', label: 'Team Chat', icon: MessageCircle },
+    { id: 'files', label: 'Shared Files', icon: FileText },
+    { id: 'mentors', label: 'Mentor Access', icon: Users },
+  ];
+
+  const onDragEnd = (result) => {
+    const { destination, source, draggableId } = result;
+    if (!destination) return;
+    if (destination.droppableId === source.droppableId && destination.index === source.index) return;
+
+    const start = workspace.columns[source.droppableId];
+    const finish = workspace.columns[destination.droppableId];
+
+    if (start === finish) {
+      const newTaskIds = Array.from(start.taskIds);
+      newTaskIds.splice(source.index, 1);
+      newTaskIds.splice(destination.index, 0, draggableId);
+      const newColumn = { ...start, taskIds: newTaskIds };
+      setWorkspaceBoard({
+        ...workspace,
+        columns: { ...workspace.columns, [newColumn.id]: newColumn },
+      });
+      return;
+    }
+
+    const startTaskIds = Array.from(start.taskIds);
+    startTaskIds.splice(source.index, 1);
+    const newStart = { ...start, taskIds: startTaskIds };
+
+    const finishTaskIds = Array.from(finish.taskIds);
+    finishTaskIds.splice(destination.index, 0, draggableId);
+    const newFinish = { ...finish, taskIds: finishTaskIds };
+
+    setWorkspaceBoard({
+      ...workspace,
+      columns: {
+        ...workspace.columns,
+        [newStart.id]: newStart,
+        [newFinish.id]: newFinish,
+      },
+    });
+  };
+
+  const submitTask = (e) => {
+    e.preventDefault();
+    if (!addForColumn) return;
+    if (!draft.content.trim()) return;
+    addWorkspaceTask(addForColumn, { content: draft.content.trim(), priority: draft.priority });
+    setDraft({ content: '', priority: 'Medium' });
+    setAddForColumn(null);
+  };
+
+  return (
+    <div className="h-full flex flex-col pb-20 pt-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Neural Optimizer Workspace</h1>
+          <p className="text-gray-500 dark:text-gray-400">Collaborate, track tasks, and manage project resources inline.</p>
+        </div>
+        
+        {/* Unified Tabs */}
+        <div className="flex p-1 bg-white/[0.04] rounded-xl border border-white/[0.06] overflow-x-auto">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${
+                activeTab === tab.id 
+                  ? 'bg-gradient-to-r from-purple-500/20 to-violet-600/20 text-purple-400 border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.1)]' 
+                  : 'text-gray-500 hover:text-white hover:bg-white/[0.04] border border-transparent'
+              }`}
+            >
+              <tab.icon className="w-4 h-4" />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-hidden flex flex-col">
+        {activeTab === 'board' && (
+          <div className="flex-1 overflow-x-auto pb-4 scrollbar-hide">
+            <DragDropContext onDragEnd={onDragEnd}>
+              <div className="flex gap-6 min-w-max h-full">
+                {workspace.columnOrder.map((columnId) => {
+                  const column = workspace.columns[columnId];
+                  const tasks = column.taskIds.map((taskId) => workspace.tasks[taskId]);
+
+                  return (
+                    <div key={column.id} className="w-80 flex flex-col bg-gray-100/50 dark:bg-[#121212]/50 rounded-2xl p-4 border border-gray-200 dark:border-white/5">
+                      <div className="flex justify-between items-center mb-4 px-2">
+                        <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                          {column.title}
+                          <span className="bg-gray-200 dark:bg-white/10 text-xs px-2 py-0.5 rounded-full text-gray-600 dark:text-gray-400">{tasks.length}</span>
+                        </h3>
+                        <button type="button" className="text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                          <MoreHorizontal className="w-5 h-5" />
+                        </button>
+                      </div>
+
+                      <Droppable droppableId={column.id}>
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                            className={`flex-1 transition-colors rounded-xl min-h-[150px] ${snapshot.isDraggingOver ? 'bg-violet-50/50 dark:bg-violet-900/10' : ''}`}
+                          >
+                            {tasks.map((task, index) => (
+                              <Draggable key={task.id} draggableId={task.id} index={index}>
+                                {(dragProvided, snapshot) => (
+                                  <div
+                                    ref={dragProvided.innerRef}
+                                    {...dragProvided.draggableProps}
+                                    {...dragProvided.dragHandleProps}
+                                    className={`mb-3 outline-none ${snapshot.isDragging ? 'rotate-2 scale-105' : ''}`}
+                                  >
+                                    <GlassCard className="p-4 cursor-grab active:cursor-grabbing hover:border-purple-500/30">
+                                      <div className="flex justify-between items-start mb-3">
+                                        <PriorityBadge priority={task.priority} />
+                                      </div>
+                                      <p className="text-sm font-medium text-gray-900 dark:text-white mb-4 leading-snug">{task.content}</p>
+                                      <div className="flex items-center justify-between text-gray-400">
+                                        <div className="flex items-center gap-3">
+                                          {task.comments > 0 && (
+                                            <span className="flex items-center gap-1 text-xs">
+                                              <MessageSquare className="w-3.5 h-3.5" /> {task.comments}
+                                            </span>
+                                          )}
+                                          {task.attachments > 0 && (
+                                            <span className="flex items-center gap-1 text-xs">
+                                              <Paperclip className="w-3.5 h-3.5" /> {task.attachments}
+                                            </span>
+                                          )}
+                                        </div>
+                                        <img src="https://i.pravatar.cc/150?img=11" className="w-6 h-6 rounded-full" alt="assignee" />
+                                      </div>
+                                    </GlassCard>
+                                  </div>
+                                )}
+                              </Draggable>
+                            ))}
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </Droppable>
+
+                      <button
+                        type="button"
+                        className="w-full py-3 mt-2 rounded-xl flex items-center justify-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-white dark:hover:bg-white/5 dark:hover:text-white transition-all border border-transparent hover:border-gray-200 dark:hover:border-white/10 hover:shadow-sm"
+                        onClick={() => setAddForColumn(column.id)}
+                      >
+                        <Plus className="w-4 h-4" /> Add Task
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </DragDropContext>
+          </div>
+        )}
+
+        {activeTab === 'chat' && (
+          <GlassCard className="flex-1 flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <MessageCircle className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-2">Team Chat</h3>
+              <p className="text-gray-400">Inline project discussion channel.</p>
+            </div>
+          </GlassCard>
+        )}
+
+        {activeTab === 'files' && (
+          <GlassCard className="flex-1 flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <FileText className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-2">Shared Files</h3>
+              <p className="text-gray-400">Project resources and assets.</p>
+            </div>
+          </GlassCard>
+        )}
+
+        {activeTab === 'mentors' && (
+          <GlassCard className="flex-1 flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <Users className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-2">Mentor Access</h3>
+              <p className="text-gray-400">Directly consult with assigned mentors.</p>
+            </div>
+          </GlassCard>
+        )}
+      </div>
+
+      <AnimatePresence>
+        {addForColumn && (
+          <motion.div
+            className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.form
+              onSubmit={submitTask}
+              initial={{ scale: 0.96, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.96, opacity: 0 }}
+              className="w-full max-w-md rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#0a0a0a] shadow-2xl p-6 space-y-4"
+            >
+              <div className="flex justify-between items-center">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">New task</h2>
+                <button type="button" className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10" onClick={() => setAddForColumn(null)}>
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div>
+                <label className="text-xs text-gray-500">Title</label>
+                <input
+                  autoFocus
+                  className="mt-1 w-full rounded-lg border border-gray-200 dark:border-white/10 bg-transparent px-3 py-2 text-sm dark:text-white outline-none focus:border-purple-500"
+                  value={draft.content}
+                  onChange={(e) => setDraft((d) => ({ ...d, content: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500">Priority</label>
+                <select
+                  className="mt-1 w-full rounded-lg border border-gray-200 dark:border-white/10 bg-transparent px-3 py-2 text-sm dark:text-white outline-none focus:border-purple-500"
+                  value={draft.priority}
+                  onChange={(e) => setDraft((d) => ({ ...d, priority: e.target.value }))}
+                >
+                  <option className="bg-[#0a0a0a]">Low</option>
+                  <option className="bg-[#0a0a0a]">Medium</option>
+                  <option className="bg-[#0a0a0a]">High</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-2">
+                <Button type="button" variant="ghost" className="flex-1" onClick={() => setAddForColumn(null)}>
+                  Cancel
+                </Button>
+                <Button type="submit" variant="primary" className="flex-1">
+                  Add
+                </Button>
+              </div>
+            </motion.form>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export default WorkspacePage;
+
+
