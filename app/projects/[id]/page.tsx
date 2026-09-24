@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { createClient } from '@/utils/supabase/server';
 import ProjectDetailView from '@/components/pages/ProjectDetailView';
+import { DEMO_PROJECTS } from '@/lib/demoData';
 
 // Server shell: its only job is real per-project metadata, so a shared link shows the
 // project's own title, summary and cover instead of the generic site card.
@@ -12,10 +13,11 @@ async function getProject(id: string) {
       .select('title, description, dept, image_url, tech, is_public')
       .eq('id', id)
       .maybeSingle();
-    return data;
+    if (data) return data;
   } catch {
-    return null;
+    // fall through to fallback
   }
+  return DEMO_PROJECTS.find((p) => p.id === id) ?? null;
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {

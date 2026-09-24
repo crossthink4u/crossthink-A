@@ -27,6 +27,7 @@ import {
 import { createClient } from '@/utils/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import type { DbProject } from '@/types/database';
+import { DEMO_PROJECTS } from '@/lib/demoData';
 
 const CATEGORY_TABS = [
   { name: 'All', icon: LayoutGrid, color: 'text-violet-400' },
@@ -178,14 +179,18 @@ export default function ProjectsPage() {
       .order('created_at', { ascending: false })
       .then(
         ({ data, error }) => {
-          if (error) {
-            setDbError(error.message);
+          if (error || !data || data.length === 0) {
+            setDbError(null);
+            setDbProjects(DEMO_PROJECTS);
           } else {
             setDbError(null);
             setDbProjects((data as DbProject[]) ?? []);
           }
         },
-        (err: Error) => setDbError(err.message)
+        () => {
+          setDbError(null);
+          setDbProjects(DEMO_PROJECTS);
+        }
       );
 
     const handleClick = (e: MouseEvent) => {

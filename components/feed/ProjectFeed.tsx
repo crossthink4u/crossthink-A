@@ -11,6 +11,7 @@ import {
 import { createClient } from '@/utils/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import type { DbProject } from '@/types/database';
+import { DEMO_PROJECTS } from '@/lib/demoData';
 
 // ─── accent helpers ──────────────────────────────────────────────────────────
 
@@ -149,16 +150,14 @@ export default function ProjectFeed() {
       .eq('is_public', true)
       .order('created_at', { ascending: false });
 
-    if (error) {
-      setProjectsError(error.message);
+    if (error || !data || data.length === 0) {
+      setPublicProjects(DEMO_PROJECTS);
       return;
     }
 
     setPublicProjects((data as DbProject[]) ?? []);
-  } catch (err) {
-    setProjectsError(
-      err instanceof Error ? err.message : 'Failed to load public projects.'
-    );
+  } catch {
+    setPublicProjects(DEMO_PROJECTS);
   }
 };
 
