@@ -189,7 +189,7 @@ export default function ProjectDetailView({ id }: { id: string }) {
 
       {/* Main content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
           {/* Left */}
           <div className="lg:col-span-2 space-y-8">
@@ -265,9 +265,9 @@ export default function ProjectDetailView({ id }: { id: string }) {
           </div>
 
           {/* Right sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-6 lg:sticky lg:top-24 self-start">
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
-              className="rounded-2xl border border-purple-500/30 bg-white/[0.025] p-6 shadow-[0_0_60px_rgba(168,85,247,0.08)] lg:sticky lg:top-24">
+              className="rounded-2xl border border-purple-500/30 bg-[#0e0e14]/95 p-6 shadow-[0_0_60px_rgba(168,85,247,0.08)] backdrop-blur-md">
               {capacity > 0 && (
                 <div className="mb-5">
                   <div className="flex justify-between text-xs text-gray-500 mb-1.5">
@@ -291,7 +291,7 @@ export default function ProjectDetailView({ id }: { id: string }) {
             </motion.div>
 
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.25 }}
-              className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-6 space-y-4">
+              className="rounded-2xl border border-white/[0.08] bg-[#0e0e14]/95 backdrop-blur-md p-6 space-y-4">
               <h3 className="font-display font-semibold text-white">Project details</h3>
               {[
                 { label: 'Department', value: project.dept },
@@ -310,7 +310,7 @@ export default function ProjectDetailView({ id }: { id: string }) {
             </motion.div>
 
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.3 }}
-              className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-6">
+              className="rounded-2xl border border-white/[0.08] bg-[#0e0e14]/95 backdrop-blur-md p-6">
               <h3 className="font-display font-semibold text-white mb-4">Project lead</h3>
               <div className="flex items-center gap-3">
                 <span className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 grid place-items-center text-xs font-bold text-white">
@@ -325,7 +325,7 @@ export default function ProjectDetailView({ id }: { id: string }) {
 
             {related.length > 0 && (
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.35 }}
-                className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-6">
+                className="rounded-2xl border border-white/[0.08] bg-[#0e0e14]/95 backdrop-blur-md p-6">
                 <h3 className="font-display font-semibold text-white mb-4">More in {project.dept}</h3>
                 <div className="space-y-3">
                   {related.map((rp) => (

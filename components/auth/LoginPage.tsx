@@ -21,8 +21,13 @@ const LoginPage = () => {
 
   React.useEffect(() => {
     const callbackError = searchParams.get('error');
+    const desc = searchParams.get('error_description');
     if (callbackError === 'auth-callback-failed') {
-      setError('Google sign-in could not be completed. Please try again.');
+      if (desc) {
+        setError(`Google sign-in could not be completed: ${desc}`);
+      } else {
+        setError('Google sign-in could not be completed. Supabase environment variables or Google OAuth provider credentials are not yet configured.');
+      }
     }
   }, [searchParams]);
 
@@ -65,9 +70,17 @@ const LoginPage = () => {
 
   const handleGoogleSignIn = async () => {
     setError(null);
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (!supabaseUrl || supabaseUrl.includes('placeholder')) {
+      setError('Supabase is not connected yet. Please configure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY and enable the Google provider in your Supabase project.');
+      return;
+    }
     setGoogleLoading(true);
     const redirectTo = searchParams.get('redirectTo');
-    const callbackUrl = new URL('/auth/callback', window.location.origin);
+    const safeOrigin = window.location.hostname === '0.0.0.0'
+      ? window.location.origin.replace('0.0.0.0', 'localhost')
+      : window.location.origin;
+    const callbackUrl = new URL('/auth/callback', safeOrigin);
     if (redirectTo?.startsWith('/')) callbackUrl.searchParams.set('next', redirectTo);
 
     const { error: oauthError } = await supabase.auth.signInWithOAuth({

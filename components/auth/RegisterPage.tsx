@@ -68,10 +68,18 @@ const RegisterForm = () => {
 
   const handleGoogleSignIn = async () => {
     setOauthError(null);
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (!supabaseUrl || supabaseUrl.includes('placeholder')) {
+      setOauthError('Supabase is not connected yet. Please configure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY and enable the Google provider in your Supabase project.');
+      return;
+    }
     setGoogleLoading(true);
+    const safeOrigin = window.location.hostname === '0.0.0.0'
+      ? window.location.origin.replace('0.0.0.0', 'localhost')
+      : window.location.origin;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${safeOrigin}/auth/callback` },
     });
     if (error) {
       setGoogleLoading(false);
@@ -435,9 +443,14 @@ const RegisterForm = () => {
                         </div>
                         <div>
                           <label className="block text-xs font-medium text-gray-400 mb-1.5">Year</label>
-                          <select value={form.year} onChange={set('year')} className={`${inputCls} appearance-none`}>
-                            <option value="">Select year</option>
-                            {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
+                          <select
+                            value={form.year}
+                            onChange={set('year')}
+                            style={{ colorScheme: 'dark' }}
+                            className={`${inputCls} appearance-none bg-[#0e0e14] text-white [&>option]:bg-[#121118] [&>option]:text-white`}
+                          >
+                            <option className="bg-[#121118] text-white" value="">Select year</option>
+                            {YEARS.map((y) => <option className="bg-[#121118] text-white" key={y} value={y}>{y}</option>)}
                           </select>
                         </div>
                       </div>
@@ -464,12 +477,17 @@ const RegisterForm = () => {
                       </div>
                       <div>
                         <label className="block text-xs font-medium text-gray-400 mb-1.5">Years of experience</label>
-                        <select value={form.yearsExp} onChange={set('yearsExp')} className={`${inputCls} appearance-none`}>
-                          <option value="">Select range</option>
-                          <option value="1-3">1–3 years</option>
-                          <option value="3-7">3–7 years</option>
-                          <option value="7-15">7–15 years</option>
-                          <option value="15+">15+ years</option>
+                        <select
+                          value={form.yearsExp}
+                          onChange={set('yearsExp')}
+                          style={{ colorScheme: 'dark' }}
+                          className={`${inputCls} appearance-none bg-[#0e0e14] text-white [&>option]:bg-[#121118] [&>option]:text-white`}
+                        >
+                          <option className="bg-[#121118] text-white" value="">Select range</option>
+                          <option className="bg-[#121118] text-white" value="1-3">1–3 years</option>
+                          <option className="bg-[#121118] text-white" value="3-7">3–7 years</option>
+                          <option className="bg-[#121118] text-white" value="7-15">7–15 years</option>
+                          <option className="bg-[#121118] text-white" value="15+">15+ years</option>
                         </select>
                       </div>
                     </>

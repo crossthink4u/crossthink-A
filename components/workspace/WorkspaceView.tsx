@@ -62,6 +62,98 @@ function Section({ title, hint, action, children }: {
   );
 }
 
+function TechStackInput({
+  tech,
+  disabled,
+  onChange,
+  className,
+}: {
+  tech: string[];
+  disabled: boolean;
+  onChange: (tech: string[]) => void;
+  className: string;
+}) {
+  const [text, setText] = useState(tech.join(', '));
+
+  useEffect(() => {
+    setText(tech.join(', '));
+  }, [tech]);
+
+  return (
+    <input
+      className={className}
+      value={text}
+      disabled={disabled}
+      placeholder="e.g. Next.js, TypeScript, PostgreSQL"
+      onChange={(e) => {
+        const val = e.target.value;
+        setText(val);
+        onChange(val.split(',').map((t) => t.trim()).filter(Boolean));
+      }}
+    />
+  );
+}
+
+function RoleRowInput({
+  role,
+  isOwner,
+  onChange,
+  onRemove,
+  inputClassName,
+}: {
+  role: OpenRole;
+  isOwner: boolean;
+  onChange: (patch: Partial<OpenRole>) => void;
+  onRemove: () => void;
+  inputClassName: string;
+}) {
+  const [skillsText, setSkillsText] = useState(role.skills.join(', '));
+
+  useEffect(() => {
+    setSkillsText(role.skills.join(', '));
+  }, [role.skills]);
+
+  return (
+    <div className="flex flex-col sm:flex-row gap-2 rounded-xl border border-white/[0.07] bg-[#0a0a0a] p-3">
+      <input
+        className={`${inputClassName} flex-1`}
+        placeholder="Role title (e.g. Frontend Dev)"
+        value={role.title}
+        disabled={!isOwner}
+        onChange={(e) => onChange({ title: e.target.value })}
+      />
+      <input
+        className={`${inputClassName} flex-1`}
+        placeholder="Skills (comma-separated, e.g. AWS, Docker)"
+        value={skillsText}
+        disabled={!isOwner}
+        onChange={(e) => {
+          const val = e.target.value;
+          setSkillsText(val);
+          onChange({ skills: val.split(',').map((s) => s.trim()).filter(Boolean) });
+        }}
+      />
+      <input
+        className={`${inputClassName} sm:w-20`}
+        type="number"
+        min={1}
+        value={role.count}
+        disabled={!isOwner}
+        onChange={(e) => onChange({ count: Number(e.target.value) || 1 })}
+      />
+      {isOwner && (
+        <button
+          type="button"
+          onClick={onRemove}
+          className="p-2 rounded-lg text-gray-600 hover:text-rose-400 hover:bg-rose-500/10 transition-colors self-start"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      )}
+    </div>
+  );
+}
+
 // ─── Application card ────────────────────────────────────────────────────────
 
 function ApplicationCard({
@@ -600,8 +692,12 @@ export default function WorkspaceView({ projectId }: { projectId: string }) {
               </Field>
 
               <Field label="Tech stack (comma-separated)">
-                <input {...inputProps} value={form.tech.join(', ')} disabled={!isOwner}
-                  onChange={(e) => patch({ tech: e.target.value.split(',').map((t) => t.trim()).filter(Boolean) })} />
+                <TechStackInput
+                  className={inputProps.className}
+                  tech={form.tech}
+                  disabled={!isOwner}
+                  onChange={(tech) => patch({ tech })}
+                />
               </Field>
 
               {form.tech.length > 0 && (
@@ -617,9 +713,17 @@ export default function WorkspaceView({ projectId }: { projectId: string }) {
             <Section title="Details">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Field label="Difficulty">
-                  <select {...inputProps} value={form.difficulty} disabled={!isOwner}
-                    onChange={(e) => patch({ difficulty: e.target.value })}>
-                    <option>Beginner</option><option>Intermediate</option><option>Advanced</option>
+                  <select
+                    {...inputProps}
+                    value={form.difficulty}
+                    disabled={!isOwner}
+                    style={{ colorScheme: 'dark' }}
+                    className={`${inputProps.className} bg-[#0e0e14] text-white [&>option]:bg-[#121118] [&>option]:text-white`}
+                    onChange={(e) => patch({ difficulty: e.target.value })}
+                  >
+                    <option className="bg-[#121118] text-white" value="Beginner">Beginner</option>
+                    <option className="bg-[#121118] text-white" value="Intermediate">Intermediate</option>
+                    <option className="bg-[#121118] text-white" value="Advanced">Advanced</option>
                   </select>
                 </Field>
                 <Field label="Duration">
@@ -656,23 +760,14 @@ export default function WorkspaceView({ projectId }: { projectId: string }) {
               ) : (
                 <div className="space-y-2">
                   {form.open_roles.map((role, i) => (
-                    <div key={i} className="flex flex-col sm:flex-row gap-2 rounded-xl border border-white/[0.07] bg-[#0a0a0a] p-3">
-                      <input {...inputProps} className={`${inputProps.className} flex-1`} placeholder="Role title"
-                        value={role.title} disabled={!isOwner}
-                        onChange={(e) => patchRole(i, { title: e.target.value })} />
-                      <input {...inputProps} className={`${inputProps.className} flex-1`} placeholder="Skills (comma-separated)"
-                        value={role.skills.join(', ')} disabled={!isOwner}
-                        onChange={(e) => patchRole(i, { skills: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })} />
-                      <input {...inputProps} className={`${inputProps.className} sm:w-20`} type="number" min={1}
-                        value={role.count} disabled={!isOwner}
-                        onChange={(e) => patchRole(i, { count: Number(e.target.value) || 1 })} />
-                      {isOwner && (
-                        <button type="button" onClick={() => patch({ open_roles: form.open_roles.filter((_, j) => j !== i) })}
-                          className="p-2 rounded-lg text-gray-600 hover:text-rose-400 hover:bg-rose-500/10 transition-colors self-start">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
+                    <RoleRowInput
+                      key={i}
+                      role={role}
+                      isOwner={isOwner}
+                      inputClassName={inputProps.className}
+                      onChange={(patchData) => patchRole(i, patchData)}
+                      onRemove={() => patch({ open_roles: form.open_roles.filter((_, j) => j !== i) })}
+                    />
                   ))}
                 </div>
               )}

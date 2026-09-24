@@ -341,11 +341,12 @@ export default function ApplyPage() {
                     <select
                       value={form.role}
                       onChange={set('role')}
-                      className={`${inputCls(accent.ring)} appearance-none`}
+                      style={{ colorScheme: 'dark' }}
+                      className={`${inputCls(accent.ring)} appearance-none bg-[#0e0e14] text-white [&>option]:bg-[#121118] [&>option]:text-white`}
                     >
-                      <option value="">I&apos;m open to any role</option>
+                      <option className="bg-[#121118] text-white" value="">I&apos;m open to any role</option>
                       {projectRoles.filter((r) => r.title).map((r) => (
-                        <option key={r.title} value={r.title}>{r.title}</option>
+                        <option className="bg-[#121118] text-white" key={r.title} value={r.title}>{r.title}</option>
                       ))}
                     </select>
                   </div>

@@ -26,6 +26,57 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
   );
 }
 
+function RoleRowItem({
+  role,
+  onChange,
+  onRemove,
+}: {
+  role: Role;
+  onChange: (patch: Partial<Role>) => void;
+  onRemove: () => void;
+}) {
+  const [skillsText, setSkillsText] = useState(role.skills.join(', '));
+
+  useEffect(() => {
+    setSkillsText(role.skills.join(', '));
+  }, [role.skills]);
+
+  return (
+    <div className="flex flex-col sm:flex-row gap-2 rounded-xl border border-white/[0.07] bg-[#0d0d0d] p-3">
+      <input
+        className={`${inputCls} flex-1`}
+        placeholder="Role title (e.g. Frontend Dev)"
+        value={role.title}
+        onChange={(e) => onChange({ title: e.target.value })}
+      />
+      <input
+        className={`${inputCls} flex-1`}
+        placeholder="Skills (comma-separated, e.g. AWS, Docker)"
+        value={skillsText}
+        onChange={(e) => {
+          const val = e.target.value;
+          setSkillsText(val);
+          onChange({ skills: val.split(',').map((s) => s.trim()).filter(Boolean) });
+        }}
+      />
+      <input
+        className={`${inputCls} sm:w-20`}
+        type="number"
+        min={1}
+        value={role.count}
+        onChange={(e) => onChange({ count: Number(e.target.value) || 1 })}
+      />
+      <button
+        type="button"
+        onClick={onRemove}
+        className="p-2 rounded-lg text-gray-600 hover:text-rose-400 hover:bg-rose-500/10 transition-colors self-start"
+      >
+        <Trash2 className="w-4 h-4" />
+      </button>
+    </div>
+  );
+}
+
 export default function NewProjectPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -196,8 +247,15 @@ export default function NewProjectPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           <Field label="Difficulty">
-            <select className={inputCls} value={form.difficulty} onChange={(e) => set({ difficulty: e.target.value })}>
-              <option>Beginner</option><option>Intermediate</option><option>Advanced</option>
+            <select
+              className={`${inputCls} bg-[#0e0e14] text-white [&>option]:bg-[#121118] [&>option]:text-white`}
+              style={{ colorScheme: 'dark' }}
+              value={form.difficulty}
+              onChange={(e) => set({ difficulty: e.target.value })}
+            >
+              <option className="bg-[#121118] text-white" value="Beginner">Beginner</option>
+              <option className="bg-[#121118] text-white" value="Intermediate">Intermediate</option>
+              <option className="bg-[#121118] text-white" value="Advanced">Advanced</option>
             </select>
           </Field>
           <Field label="Duration">
@@ -233,18 +291,12 @@ export default function NewProjectPage() {
           ) : (
             <div className="space-y-2">
               {roles.map((role, i) => (
-                <div key={i} className="flex flex-col sm:flex-row gap-2 rounded-xl border border-white/[0.07] bg-[#0d0d0d] p-3">
-                  <input className={`${inputCls} flex-1`} placeholder="Role title (e.g. Frontend Dev)" value={role.title}
-                    onChange={(e) => setRoles((rs) => rs.map((r, j) => (j === i ? { ...r, title: e.target.value } : r)))} />
-                  <input className={`${inputCls} flex-1`} placeholder="Skills (comma-separated)" value={role.skills.join(', ')}
-                    onChange={(e) => setRoles((rs) => rs.map((r, j) => (j === i ? { ...r, skills: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) } : r)))} />
-                  <input className={`${inputCls} sm:w-20`} type="number" min={1} value={role.count}
-                    onChange={(e) => setRoles((rs) => rs.map((r, j) => (j === i ? { ...r, count: Number(e.target.value) || 1 } : r)))} />
-                  <button type="button" onClick={() => setRoles((rs) => rs.filter((_, j) => j !== i))}
-                    className="p-2 rounded-lg text-gray-600 hover:text-rose-400 hover:bg-rose-500/10 transition-colors self-start">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+                <RoleRowItem
+                  key={i}
+                  role={role}
+                  onChange={(patch) => setRoles((rs) => rs.map((r, j) => (j === i ? { ...r, ...patch } : r)))}
+                  onRemove={() => setRoles((rs) => rs.filter((_, j) => j !== i))}
+                />
               ))}
             </div>
           )}

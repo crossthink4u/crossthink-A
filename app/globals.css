@@ -56,6 +56,21 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
 }
 
+/* Global Select & Option styling for dark theme readability */
+select {
+  color-scheme: dark;
+}
+
+select option {
+  background-color: #121118;
+  color: #f3f4f6;
+}
+
+select option:checked {
+  background-color: #7c3aed;
+  color: #ffffff;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
